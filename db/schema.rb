@@ -15,6 +15,7 @@ ActiveRecord::Schema.define(version: 20150209045912) do
 
   create_table "games", force: :cascade do |t|
     t.string   "state"
+    t.integer  "active_player_id"
     t.text     "board"
     t.text     "rounds"
     t.text     "cults"

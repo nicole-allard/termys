@@ -24,7 +24,7 @@ define([
 
         initialize: function () {
             $.when(this.initUser()).then(_.bind(function () {
-                this.poller = new Poller().start();
+                this.poller = new Poller({}, { app: this }).start();
             }, this));
         },
 

@@ -12,12 +12,26 @@ class HomeController < ApplicationController
         # TODO check the state of the game, anything other than complete
         # should be picked back up
         game = Game.last
-        if !game || game.state == 'complete'
-            Game.connection.execute("INSERT INTO games DEFAULT VALUES")
-            game = Game.last
+        if !game || game.state == "complete"
+            Game.connection.execute("INSERT INTO games (state) VALUES ('config')")
+
+            # If a new game was created, save the name of the player who did
+            # the creation
+            player_name = params[:player_name]
         end
 
         Game.connection.execute("END")
+
+        # Indicates that this player just created a new game. Create a new
+        # Player and set it to be the active player in charge of the game
+        # configuration stage.
+        if player_name
+            Game.uncached do
+                game = Game.last
+            end
+            player = Player.create(:name => player_name, :game_id => game.id)
+            game.update_attributes(:active_player_id => player.id)
+        end
 
         render :json => {
             :game => game,

@@ -2,6 +2,7 @@ class CreateGames < ActiveRecord::Migration
   def change
     create_table :games do |t|
       t.string :state
+      t.integer :active_player_id
       t.text :board
       t.text :rounds
       t.text :cults
