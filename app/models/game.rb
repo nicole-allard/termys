@@ -1,6 +1,8 @@
 class Game < ActiveRecord::Base
     has_many :players
 
+    # TODO verify the value of state
+
     # state: string
     #           config, joining, drafting, dwellings, bonus, active, complete
     #

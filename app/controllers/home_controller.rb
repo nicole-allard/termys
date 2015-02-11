@@ -1,4 +1,38 @@
 class HomeController < ApplicationController
+
+    # Returns the current active game, or creates a new game if an active
+    # game does not exist.
+    def get_or_create_game
+        # Since multiple players may attempt to get_or_create_game at the
+        # same time, only allow 1 the possibility of creating a new game.
+        Game.connection.execute("BEGIN EXCLUSIVE")
+
+        # Check if the latest game is active. If so, continue that game.
+        # Otherwise create a new game.
+        # TODO check the state of the game, anything other than complete
+        # should be picked back up
+        game = Game.last
+        if !game || game.state == 'complete'
+            Game.connection.execute("INSERT INTO games DEFAULT VALUES")
+            game = Game.last
+        end
+
+        Game.connection.execute("END")
+
+        render :json => {
+            :game => game,
+            :players => game ? game.players : []
+        }
+    end
+
+    def get_latest
+        game = Game.last
+        render :json => {
+            :game => game,
+            :players => game ? game.players : []
+        }
+    end
+
     # player connects to server, server looks for latest game in db, if game is in
     # progress go to the request to join
     #
