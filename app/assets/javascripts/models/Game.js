@@ -4,8 +4,19 @@ define([
     Backbone
 ) {
     var Game = Backbone.Model.extend({
+        // properties: {
+        //     activePlayer: Player,
+        //     players: [Player],
+        //     rounds: [Round],
+        //     board: [[Hex]],
+        //     cults: { type: CultTrack },
+        //     keys: [ TownKey ],
+        //     favorTiles: [ FavorTile ],
+        //     bonuses: [ Bonus ]
+        // },
+
         defaults: {
-            board: [[]]
+            state: ''
         },
 
         initialize: function (attrs) {

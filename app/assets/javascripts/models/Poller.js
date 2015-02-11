@@ -42,7 +42,8 @@ define([
         },
 
         parse: function (response) {
-            console.log(JSON.stringify(Poller.camelizeObject(response)));
+            response = Poller.camelizeObject(response));
+
         }
     }, {
         camelizeObject: function (obj) {
