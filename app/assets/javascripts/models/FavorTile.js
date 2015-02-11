@@ -17,15 +17,31 @@ define([
                 coins: 0
             },
             actionBonus: {
-                condition: null,
-                reward: null
+                eventName: '',
+                handler: $.noop
             },
-            passBonus: {
-                structureType: '',
-                victoryPoints: 0
-            },
+            passBonus: $.noop,
             immediateAction: $.noop,
             specialAction: $.noop
+        },
+
+        take: function (player) {
+            var newIncome = _.clone(player.get('income'));
+            _.each(this.get('income'), function (value, resource) {
+                newIncome[resource] += value;
+            });
+
+            player.set({
+                income: newIncome
+            });
+
+            this.get('immediateAction').call(this, player);
+
+            var actionBonus = this.get('actionBonus');
+            this.listenTo(player, actionBonus.eventName, _.partial(actionBonus.handler, player));
+
+            // No need to handle the special action, the FavorTileView will call the special
+            // action should the player click the button to perform it
         }
     });
 
@@ -39,7 +55,7 @@ define([
                 }
             },
             2: {
-                immediateAction: function () {
+                immediateAction: function (player) {
                     // TODO search through all structure collections belonging to
                     // this player and find any that are not yet towns that have 6
                     // structure points, and turn them into towns.
@@ -49,19 +65,23 @@ define([
         water: {
             1: {
                 actionBonus: {
-                    // TODO
+                    eventName: 'upgrade:structure',
+                    handler: function (player, newStructure) {
+                        if (newStructure.get('type') === 'tradingHouse')
+                            player.addVictoryPoints(3);
+                    }
                 }
             },
             2: {
-                immediateAction: function () {
-                    // TODO add a special action to the player allowing advancing up
-                    // 1 cult track by 1 spot
+                specialAction: function (player) {
+                    // TODO prompt user to pick a cult track on which to advance
+                    // 1 position
                 }
             }
         },
         air: {
             1: {
-                passBonus: function () {
+                passBonus: function (player) {
                     // TODO find all trading houses on the board belonging to this player
                     // and award victory points: 2/3/3/4 Victory points for 1/2/3/4
                 }
@@ -75,7 +95,11 @@ define([
         earth: {
             1: {
                 actionBonus: {
-                    // TODO
+                    eventName: 'build:structure',
+                    handler: function (player, newStructure) {
+                        if (newStructure.get('type') === 'dwelling')
+                            player.addVictoryPoints(2);
+                    }
                 }
             },
             2: {

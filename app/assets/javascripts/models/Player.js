@@ -55,6 +55,12 @@ define([
             cookies.create(Player.USER_COOKIE, this.get('name'), {
                 expiresIn: 1000 * 60 * 60 * 24
             });
+        },
+
+        addVictoryPoints: function (points) {
+            this.set({
+                victoryPoints: this.get('victoryPoints') + points
+            });
         }
     }, {
         USER_COOKIE: 'username',

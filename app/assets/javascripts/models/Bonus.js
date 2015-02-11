@@ -119,7 +119,7 @@ define([
                 income: {
                     coins: 2
                 },
-                specialActions: function () {
+                specialAction: function () {
                     // TODO add 1 spade to the player's spades and then begin the
                     // terraform and build action
                 }
@@ -128,7 +128,7 @@ define([
                 income: {
                     coins: 4,
                 },
-                specialActions: function () {
+                specialAction: function () {
                     // TODO prompt user to pick a cult track on which to advance
                     // 1 position
                 }
