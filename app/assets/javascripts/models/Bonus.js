@@ -1,6 +1,8 @@
 define([
+    'jquery',
     'backbone'
 ], function (
+    $,
     Backbone
 ) {
     var Bonus = Backbone.Model.extend({
@@ -12,14 +14,84 @@ define([
                 priests: 0
             },
             shippingValue: 0,
-            specialActions: null,
-            passBonus: {
-                structureType: '',
-                victoryPoints: 0
-            },
+            specialAction: $.noop,
+            passBonusName: '',
             coins: 0
+        },
+
+        addCoin: function () {
+            this.set({ coins: this.get('coins') + 1 });
+        },
+
+        /**
+         * Called when the given player takes this bonus. Updates the
+         * player's state, possibly updating income, coins, bonuses,
+         * etc.
+         */
+        take: function (player) {
+            var newIncome = _.clone(player.get('income'));
+            _.each(this.get('income'), function (value, resource) {
+                newIncome[resource] += value;
+            });
+
+            // Add bonus income, bonus shipping value, and any coins that
+            // were on this bonus tile.
+            player.set({
+                income: newIncome,
+                shippingValue: player.get('shippingValue') + this.get('shippingValue'),
+                coins: player.get('coins') + this.get('coins')
+            });
+
+            // Create a function bound to the given player and execute
+            // the function when the player passes.
+            this.set({
+                passBonus: _.partial(Bonus.passBonuses[this.get('passBonusName')], player)
+            });
+            this.listenTo(player, 'pass', this.get('passBonus'));
+
+            // No need to handle the special action, the BonusView will call the special
+            // action should the player click the button to perform it
+        },
+
+        /**
+         * Called when the player returns this bonus. Updates the
+         * player's state, remove all the additions applied in take.
+         */
+        yield: function (player) {
+            var newIncome = _.clone(player.get('income'));
+            _.each(this.get('income'), function (value, resource) {
+                newIncome[resource] = Math.max(0, newIncome[resource] - value);
+            });
+
+            // Remove bonus income and bonus shipping value.
+            player.set({
+                income: newIncome,
+                shippingValue: Math.max(0, player.get('shippingValue') - this.get('shippingValue'))
+            });
+
+            // Remove pass bonus handler when the player passes and delete
+            // the bonus handler bound to the given player.
+            this.stopListening(player, 'pass', this.get('passBonus'));
+            this.unset('passBonus');
         }
     }, {
+        passBonuses: {
+            dwellings: function (player) {
+                // TODO look for all the dwellings on the board belonging to this player
+                // and give the player 1 point for each dwelling
+            },
+
+            tradingHouses: function (player) {
+                // TODO look for all the tradingHouses on the board belonging to this player
+                // and give the player 2 points for each tradingHouse
+            },
+
+            strongholdAndSanctuary: function (player) {
+                // TODO look for any strongholds or sanctuaries on the board belonging to
+                // this player and give the player 4 points for each
+            }
+        },
+
         TILES: {
             'priests::': {
                 income: {
@@ -48,45 +120,36 @@ define([
                     coins: 2
                 },
                 specialActions: function () {
-                    // TODO add a special action to terraform/build - 1 spade to the
-                    // active player
+                    // TODO add 1 spade to the player's spades and then begin the
+                    // terraform and build action
                 }
             },
             'coins:cult:': {
                 income: {
                     coins: 4,
-                    specialActions: function () {
-                        // TODO add a special action to advance 1 up 1 cult track to
-                        // the active player
-                    }
+                },
+                specialActions: function () {
+                    // TODO prompt user to pick a cult track on which to advance
+                    // 1 position
                 }
             },
             'coins::dwelling': {
                 income: {
                     coins: 2
                 },
-                passBonus: {
-                    structureType: 'dwelling',
-                    victoryPoints: 1
-                }
+                passBonusName: 'dwellings'
             },
             'workers::tradingHouse': {
                 income: {
                     workers: 1
                 },
-                passBonus: {
-                    structureType: 'tradingHouse',
-                    victoryPoints: 2
-                }
+                passBonusName: 'tradingHouses'
             },
             'workers::stronghold,sanctuary': {
                 income: {
                     workers: 2
                 },
-                passBonus: {
-                    structureType: 'stronghold/sanctuary',
-                    victoryPoints: 4
-                }
+                passBonusName: 'strongholdAndSanctuary'
             }
         },
 
