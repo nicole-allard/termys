@@ -15,3 +15,12 @@
 /log/*
 !/log/.keep
 /tmp
+
+# Intellij
+.idea/
+*.iml
+
+# Build
+py_env
+node_env
+bower_components
