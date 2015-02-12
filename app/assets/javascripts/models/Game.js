@@ -1,33 +1,136 @@
 define([
-    'backbone'
+    'backbone',
+
+    'models/common/UniqueModel',
+    'models/Player',
+    'models/Round',
+    'models/Hex'
 ], function (
-    Backbone
+    Backbone,
+
+    UniqueModel,
+    Player,
+    Round,
+    Hex
 ) {
     var Game = Backbone.Model.extend({
         // properties: {
         //     activePlayer: Player,
-        //     players: [Player],
-        //     rounds: [Round],
+        //     players: Collection(Player),
+        //     rounds: Collection(Round),
         //     board: [[Hex]],
         //     cults: { type: CultTrack },
-        //     keys: [ TownKey ],
-        //     favorTiles: [ FavorTile ],
-        //     bonuses: [ Bonus ]
+        //     keys: Collection(TownKey),
+        //     favorTiles: Collection(FavorTile),
+        //     bonuses: Collection(Bonus)
         // },
 
         defaults: {
             state: ''
         },
 
-        initialize: function (attrs) {
-            this.initializeHexes(attrs.board);
+        initialize: function (attrs, options) {
+            this.app = options.app;
+
+            this.on('change', this.updateProperties);
+            this.updateProperties();
         },
 
-        initializeHexes: function (board) {
+        /**
+         * Called upon initialization and whenever attributes change.
+         * Creates or updates all the properties that are synced from
+         * the backend as attributes but should be stored as properties
+         * (basically anything that's a model or collection)
+         */
+        updateProperties: function () {
+            if (this.get('players'))
+                this.updateCollection('players', Player);
+
+            if (this.get('activePlayerId'))
+                this.updateActivePlayer();
+
+            if (this.get('rounds'))
+                this.updateCollection('rounds', Round);
+
+            if (this.get('board'))
+                this.updateBoard();
+
+            // TODO turn the following attrs into properties:
+            // cults
+            // keys
+            // favorTiles
+            // bonuses
+        },
+
+        /**
+         * Updates or creates the collection stored as a property with the given name
+         * on this Game model. Uses the values stored as attributes to update the
+         * models. Afterwards, unsets the attribute leaving only the property.
+         *
+         * Can be passed either a string and a model, where the string is the name of
+         * both the property and the attribute, and the model is the type of Model
+         * to create and add to the collection,
+         * OR
+         * Can be passed 2 separate strings, the name of the attr and the name of the
+         * property, and the model.
+         */
+        updateCollection: function (attrName, propertyName, Model) {
+            if (propertyName.prototype instanceof Backbone.Model) {
+                Model = propertyName;
+                propertyName = attrName;
+            }
+
+            var collection = this[propertyName];
+            if (!collection)
+                collection = this[propertyName] = new Backbone.Collection();
+
+            _.each(this.get(attrName), function (attrs) {
+                // If the model represented by attrs already exists in the collection,
+                // if will also exist in UniqueModel. Calling new UniqueModel will update
+                // the existing model, and calling add will have no effect since Collections
+                // remove duplicates.
+                // If the model doesn't already exist, it will be created and added to the
+                // collection.
+                collection.add(new UniqueModel(Model, attrs));
+            });
+
+            this.unset(attrName);
+        },
+
+        /**
+         * Updates the activePlayer with the player specified by id.
+         * Once the activePlayer is set, deletes the attribute.
+         */
+        updateActivePlayer: function () {
+            this.activePlayer = this.players.find(this.get('activePlayerId'));
+
+            this.unset('activePlayerId');
+        },
+
+        updateBoard: function () {
+            if (!this.board)
+                this.board = this.initializeBoard(this.get('board'));
+            else {
+                _.each(this.get('board'), function (row) {
+                    _.each(row, function (hex) {
+                        // Since the board has already been initialized, the unique hex
+                        // models should all exist already. This should simply be updating
+                        // their state. Something is very wrong if get returns null.
+                        UniqueModel.get(Hex, hex.id).set(hex);
+                    });
+                });
+            }
+
+            this.unset('board');
+        },
+
+        initializeBoard: function (board) {
+
+
             // Replace objects in board array with Hex models
             _.each(board, function (row, rowIndex) {
                 _.each(row, function (hex, colIndex) {
-                    board[rowIndex][colIndex] = new Hex(hex);
+                    board[rowIndex][colIndex] = new UniqueModel(Hex, hex);
                 });
             });
 
@@ -63,6 +166,8 @@ define([
                     }
                 });
             });
+
+            return board;
         },
 
         // TODO implement:

@@ -1,10 +1,14 @@
 define([
     'backbone',
 
+    'models/common/UniqueModel',
+
     'utils/cookies',
     'utils/actions'
 ], function (
     Backbone,
+
+    UniqueModel,
 
     cookies,
     actions
@@ -75,6 +79,8 @@ define([
     });
 
     _.extend(Player.prototype, actions);
+
+    UniqueModel.addType('Player', Player);
 
     return Player;
 });

@@ -16,6 +16,8 @@ define([
                 reward: null
             }
         }
+
+        // TODO implement switching through phases
     }, {
         PHASES: {
             PRE: 0, // Round has not yet begun
