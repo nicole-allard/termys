@@ -95,6 +95,7 @@ define([
             });
 
             this.unset(attrName);
+            this.trigger('changeProperty:' + propertyName);
         },
 
         /**
@@ -105,6 +106,7 @@ define([
             this.activePlayer = this.players.find(this.get('activePlayerId'));
 
             this.unset('activePlayerId');
+            this.trigger('changeProperty:activePlayer');
         },
 
         updateBoard: function () {
@@ -122,6 +124,7 @@ define([
             }
 
             this.unset('board');
+            this.trigger('changeProperty:board');
         },
 
         initializeBoard: function (board) {
@@ -170,6 +173,21 @@ define([
             return board;
         },
 
+        /**
+         * Returns the minimal json representation of the game that can
+         * be save to the db and parsed by the frontend models
+         */
+        toDbJSON: function () {
+            var json = _.clone(_.pick(this.attributes, _.keys(this.defaults)));
+            json.players = _.invoke(this.players, 'toDbJSON');
+            json.activePlayerId = this.activePlayer.id;
+            json.rounds = _.invoke(this.rounds, 'toDbJSON');
+            json.board = _.map(this.board, function (row) {
+                return _.map(row, function (hex) {
+                    return hex.toDbJSON();
+                });
+            });
+        }
         // TODO implement:
         // get all structure collections
         //  used by area scoring and the end, and determining if a town is founded when

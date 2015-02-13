@@ -1,7 +1,13 @@
 define([
-    'backbone'
+    'backbone',
+
+    'models/common/UniqueModel',
+    'models/Structure'
 ], function (
-    Backbone
+    Backbone,
+
+    UniqueModel,
+    Structure
 ) {
     var Hex = Backbone.Model.extend({
         // properties: {
@@ -18,6 +24,24 @@ define([
             terrain: null,
             bridgeDirections : [],
             key: false
+        },
+
+        initialize: function () {
+            this.on('change', this.updateProperties);
+            this.updateProperties();
+        },
+
+        updateProperties: function () {
+            var structureAttrs = this.get('structure');
+            if (structureAttrs) {
+                if (this.structure)
+                    this.structure.set(structureAttrs);
+                else
+                    this.structure = new UniqueModel(Structure, structureAttrs);
+
+                this.trigger('changeProperty:structure');
+                this.unset('structure');
+            }
         },
 
         debugPrint: function () {
@@ -116,10 +140,11 @@ define([
         }
 
 
+        // TODO implement get structure collection
 
-        // hex - get structure collection
-        // hex - is hex directly adjacent?
-        // hex - is hex indirectly adjacent?
+        toDbJSON: function () {
+
+        }
     }, {
         DIRECTIONS: [
             'north',
@@ -128,7 +153,9 @@ define([
             'south',
             'southWest',
             'southEast'
-        ]
+        ],
+
+        // TODO implement expand
     });
 
     return Hex;

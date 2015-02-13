@@ -18,6 +18,8 @@ define([
         }
 
         // TODO implement switching through phases
+
+        // TODO implement toDbJSON
     }, {
         PHASES: {
             PRE: 0, // Round has not yet begun
@@ -26,6 +28,8 @@ define([
             CLEANUP: 3, // Round is active and in clean phase
             COMPLETE: 4 // Round is complete
         }
+
+        // TODO implement parsing from backend
     });
 
     return Round;
