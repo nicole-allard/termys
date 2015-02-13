@@ -187,7 +187,12 @@ define([
                     return hex.toDbJSON();
                 });
             });
+        },
+
+        save: function () {
+            // TODO send the result of toDbJSON to backend.
         }
+
         // TODO implement:
         // get all structure collections
         //  used by area scoring and the end, and determining if a town is founded when

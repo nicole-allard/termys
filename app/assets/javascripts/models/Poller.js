@@ -70,9 +70,9 @@ define([
 
             if (!this.app.game) {
                 // This user is joining a game. Create all the necessary FE models.
-                this.app.game = new Game(response.game, {
+                this.app.setGame(new Game(response.game, {
                     app: this.app
-                });
+                }));
             } else if (this.app.game.activePlayer === this.app.player) {
                 // This active player is this user's player. Don't want to overwrite
                 // the game or the active player state. Only update other players.

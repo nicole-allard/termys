@@ -53,6 +53,27 @@ define([
 
         initialize: function () {
             this.on('change:name', this.updateCookie);
+
+            var App = require('app');
+            this.app = App.get();
+            if (this.app.game)
+                this.listenToGame(this.app.game);
+            else
+                this.listenTo(this.app, 'change:game', this.listenToGame);
+        },
+
+        listenToGame: function (game) {
+            this.listenTo(game, 'changeProperty:activePlayer', this.handleStateChange);
+            this.listenTo(game, 'change:state', this.handleStateChange);
+        },
+
+        handleStateChange: function () {
+            var game = this.app.game;
+            if (game.activePlayer === this) {
+                if (game.get('state') === 'config')
+                    this.app.handleConfiguration();
+                // TODO handle other states
+            }
         },
 
         updateCookie: function () {
@@ -65,6 +86,12 @@ define([
             this.set({
                 victoryPoints: this.get('victoryPoints') + points
             });
+        },
+
+        toDbJSON: function () {
+            return _.extend({
+                bonus: this.bonus && this.bonus.toDbJSON() || null
+            }, this.attributes);
         }
     }, {
         USER_COOKIE: 'username',

@@ -46,6 +46,27 @@ define([
             return usernamePromise.promise();
         },
 
+        setGame: function (game) {
+            this.game = game;
+            this.trigger('change:game', game);
+        },
+
+        /**
+         * Handles the configuration state of the game when this user is the
+         * active configuring player.
+         */
+        handleConfirguation: function () {
+            // TODO show the configuration view to let the user choose how
+            // the game should be configured
+            // For now, don't allow config, everything goes by preset values
+            this.game.set({
+                config: 'preset',
+                state: 'bonus'
+            });
+
+            this.game.save();
+        },
+
         showView: function (view) {
             $('body').html(view.render().$el);
         }
