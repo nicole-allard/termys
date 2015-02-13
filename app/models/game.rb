@@ -8,8 +8,14 @@ class Game < ActiveRecord::Base
     # state: string
     #           config, joining, drafting, dwellings, bonus, active, complete
     #
-    # hexes: json 2D array of hex objects (terrain, key, structure (player id, type)). FE knows
-    #           how to build the board from this array.
+    # hexes: json 2D array of hex objects. FE knows how to build the board from this array.
+    #           hex:
+    #               terrain: plains/swamp/lakes/forest/mountains/wasteland/desert
+    #               key: true/false - whether or not there is a town key on this hex
+    #               bridge_directions: optional JSON array of direction strings: N, NE, SE, S, SW, NW
+    #               structure: JSON object
+    #                   player_id
+    #                   type: bridge/dwelling/tradingHouse/temple/stronghold/sanctuary
     #
     # rounds: json array objects (id, phase)
     #           ids are strings of the form cultName:bonus (ex: water:spade). FE can determine from
