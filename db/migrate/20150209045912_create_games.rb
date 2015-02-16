@@ -3,6 +3,7 @@ class CreateGames < ActiveRecord::Migration
     create_table :games do |t|
       t.string :state
       t.integer :active_player_id
+      t.text :blocking_players
       t.text :board
       t.text :rounds
       t.text :cults

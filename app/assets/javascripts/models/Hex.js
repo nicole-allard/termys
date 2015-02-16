@@ -137,7 +137,7 @@ define([
             }
 
             return Infinity;
-        }
+        },
 
 
         // TODO implement get structure collection
@@ -154,6 +154,23 @@ define([
             'southWest',
             'southEast'
         ],
+
+        TERRAINS: [
+            'plains',
+            'swamp',
+            'lakes',
+            'forest',
+            'mountains',
+            'wasteland',
+            'desert'
+        ],
+
+        getTerraformCost: function (initialTerrain, finalTerrain) {
+            var initialIndex = _.indexOf(Hex.TERRAINS, initialTerrain),
+                finalIndex = _.indexOf(Hex.TERRAINS, finalTerrain),
+                length = Hex.TERRAINS.length;
+            return Math.min((initialIndex - finalIndex).mod(length), (finalIndex - initialIndex).mod(length));
+        }
 
         // TODO implement expand
     });

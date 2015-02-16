@@ -16,6 +16,7 @@ define([
     var Game = Backbone.Model.extend({
         // properties: {
         //     activePlayer: Player,
+        //     blockingPlayers: Collection(Player),
         //     players: Collection(Player),
         //     rounds: Collection(Round),
         //     board: [[Hex]],
@@ -43,6 +44,9 @@ define([
          * (basically anything that's a model or collection)
          */
         updateProperties: function () {
+            // Collection is created on the frontend before being populated
+            this.blockingPlayers = new Backbone.Collection();
+
             if (this.get('players'))
                 this.updateCollection('players', Player);
 
@@ -84,6 +88,7 @@ define([
             if (!collection)
                 collection = this[propertyName] = new Backbone.Collection();
 
+            var app = this.app;
             _.each(this.get(attrName), function (attrs) {
                 // If the model represented by attrs already exists in the collection,
                 // if will also exist in UniqueModel. Calling new UniqueModel will update
@@ -91,7 +96,7 @@ define([
                 // remove duplicates.
                 // If the model doesn't already exist, it will be created and added to the
                 // collection.
-                collection.add(new UniqueModel(Model, attrs));
+                collection.add(new UniqueModel(Model, attrs, { app: app }));
             });
 
             this.unset(attrName);

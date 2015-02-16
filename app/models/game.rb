@@ -8,6 +8,11 @@ class Game < ActiveRecord::Base
     # state: string
     #           config, joining, drafting, dwellings, bonus, active, complete
     #
+    # active_player_id: id of the active player
+    #
+    # blocking_players: json array of ids of players who are blocking the current round/action
+    #                   from completing
+    #
     # hexes: json 2D array of hex objects. FE knows how to build the board from this array.
     #           hex:
     #               terrain: plains/swamp/lakes/forest/mountains/wasteland/desert

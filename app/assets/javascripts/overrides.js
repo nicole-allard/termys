@@ -5,6 +5,10 @@ define([
     $,
     _
 ) {
+    Number.prototype.mod = function(n) {
+        return ((this%n)+n)%n;
+    };
+
     String.prototype.toCamelCase = function () {
         return this.replace(/(\_[a-z])/g, function ($1) { return $1.toUpperCase().replace('_',''); });
     };
