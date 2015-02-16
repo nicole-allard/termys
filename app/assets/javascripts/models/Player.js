@@ -2,6 +2,7 @@ define([
     'backbone',
 
     'models/common/UniqueModel',
+    'models/Bonus',
 
     'utils/cookies',
     'utils/actions'
@@ -9,6 +10,7 @@ define([
     Backbone,
 
     UniqueModel,
+    Bonus,
 
     cookies,
     actions
@@ -53,6 +55,7 @@ define([
 
         initialize: function () {
             this.on('change:name', this.updateCookie);
+            this.on('change', this.updateProperties);
 
             var App = require('app');
             this.app = App.get();
@@ -60,6 +63,13 @@ define([
                 this.listenToGame(this.app.game);
             else
                 this.listenTo(this.app, 'change:game', this.listenToGame);
+        },
+
+        updateProperties: function () {
+            if (this.get('bonus')) {
+                this.bonus = UniqueModel.get(Bonus, this.get('bonus'));
+                this.unset('bonus');
+            }
         },
 
         listenToGame: function (game) {

@@ -59,11 +59,13 @@ define([
             if (this.get('board'))
                 this.updateBoard();
 
+            if (this.get('bonuses'))
+                this.updateCollection('bonuses', Bonus);
+
             // TODO turn the following attrs into properties:
             // cults
             // keys
             // favorTiles
-            // bonuses
         },
 
         /**

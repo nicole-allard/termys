@@ -1,9 +1,13 @@
 define([
     'jquery',
-    'backbone'
+    'backbone',
+
+    'models/common/UniqueModel'
 ], function (
     $,
-    Backbone
+    Backbone,
+
+    UniqueModel
 ) {
     var Bonus = Backbone.Model.extend({
         defaults: {
@@ -157,6 +161,8 @@ define([
             return new Bonus(TILES[id]);
         }
     });
+
+    UniqueModel.add('Bonus', Bonus);
 
     return Bonus;
 });
