@@ -135,8 +135,6 @@ define([
         },
 
         initializeBoard: function (board) {
-
-
             // Replace objects in board array with Hex models
             _.each(board, function (row, rowIndex) {
                 _.each(row, function (hex, colIndex) {
@@ -147,32 +145,23 @@ define([
             // Set up adjacency between Hexes
             _.each(board, function (row, rowIndex) {
                 _.each(row, function (hex, colIndex) {
-                    if (rowIndex > 1)
-                        hex.north = board[rowIndex - 2][colIndex];
-
-                    if (rowIndex + 2 < board.length)
-                        hex.south = board[rowIndex + 2][colIndex];
+                    hex.east = board[rowIndex][colIndex + 1];
+                    hex.west = board[rowIndex][colIndex - 1];
 
                     var colOffset = (rowIndex % 2),
                         eastIndex = colIndex + colOffset,
                         westIndex = colIndex + colOffset - 1,
-                        northIndex = rowIndex - 1,
-                        southIndex = rowIndex + 1;
+                        northRow = board[rowIndex - 1],
+                        southRow = board[rowIndex + 1];
 
-                    if (northIndex >= 0) {
-                        if (eastIndex < row.length)
-                            hex.northEast = board[northIndex][eastIndex];
-
-                        if (westIndex >= 0)
-                            hex.northWest = board[northIndex][westIndex];
+                    if (northRow) {
+                        hex.northEast = northRow[eastIndex];
+                        hex.northWest = northRow[westIndex];
                     }
 
-                    if (southIndex < board.length) {
-                        if (eastIndex < row.length)
-                            hex.southEast = board[southIndex][eastIndex];
-
-                        if (westIndex >= 0)
-                            hex.southWest = board[southIndex][westIndex];
+                    if (southRow) {
+                        hex.southEast = southRow[eastIndex];
+                        hex.southWest = southRow[westIndex];
                     }
                 });
             });

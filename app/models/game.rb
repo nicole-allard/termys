@@ -1,5 +1,6 @@
 class Game < ActiveRecord::Base
     has_many :players
+    has_many :blocking_players, :through => :blocking_players, :class_name => "Player"
     has_one :active_player, :through => :active_player_id, :class_name => "Player"
 
     # TODO verify the value of state

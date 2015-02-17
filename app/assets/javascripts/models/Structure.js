@@ -37,7 +37,6 @@ define([
         }
     }, {
         POWER_LEVELS: {
-            'bridges': 0,
             'dwellings': 1,
             'tradingHouses': 2,
             'temples': 2,

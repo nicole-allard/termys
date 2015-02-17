@@ -79,7 +79,7 @@ define([
 
         handleStateChange: function () {
             var game = this.app.game;
-            if (game.activePlayer === this) {
+            if (game.activePlayer !== this) {
                 if (game.get('state') === 'config')
                     this.app.handleConfiguration();
                 // TODO handle other states
