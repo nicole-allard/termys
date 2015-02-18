@@ -2,7 +2,7 @@ define([
     'underscore',
     'backbone',
 
-    'models/commons/UniqueModel',
+    'models/common/UniqueModel',
     'models/Hex'
 ], function (
     _,
@@ -15,7 +15,7 @@ define([
 
     var Board = Backbone.Model.extend({
         // properties: {
-        //     hexes: Collection(Collection(Hex))
+        //     hexes: [[Hex]]
         // }
 
         initialize: function () {
@@ -30,9 +30,9 @@ define([
             if (hexesData) {
                 // Update the attributes of each hex as per the data synced
                 // from the db (structures, bridges, keys)
-                this.hexes.each(function (row, rowIndex) {
+                _.each(this.hexes, function (row, rowIndex) {
                     var rowData = hexesData[rowIndex];
-                    row.each(function (hex, colIndex) {
+                    _.each(row, function (hex, colIndex) {
                         hex.set(rowData[colIndex]);
                     });
                 });
@@ -98,11 +98,42 @@ define([
         createEmptyBoard: function () {
             // Create the Hex models in a 2D array with the standard terrain and bridge
             // layouts.
-            var emptyBoard = new Backbone.Collection(_.map(Board.BOARD_TERRAINS, function (row, rowIndex) {
-                var rowBridgeDirections = Board.BRIDGE_DIRECTIONS[rowIndex].split(',');
-                return new Backbone.Collection(_.map(row.split(','), function (terrain, colIndex) {
+            var emptyBoard = _.map(Board.BOARD_TERRAINS, function (row, rowIndex) {
+                return _.map(row.split(','), function (terrain, colIndex) {
                     if (!terrain)
                         return null;
+
+                    return new UniqueModel(Hex, {
+                        terrain: Board.TERRAIN_MAPPING[terrain]
+                    });
+                });
+            });
+
+            // Set up adjacency between Hexes and the allowed bridge directions
+            _.each(emptyBoard, function (row, rowIndex) {
+                var rowBridgeDirections = Board.BRIDGE_DIRECTIONS[rowIndex].split(',');
+                _.each(row, function (hex, colIndex) {
+                    if (!hex)
+                        return;
+
+                    hex.east = row[colIndex + 1];
+                    hex.west = row[colIndex - 1];
+
+                    var colOffset = (rowIndex % 2),
+                        eastIndex = colIndex + colOffset,
+                        westIndex = colIndex + colOffset - 1,
+                        northRow = emptyBoard[rowIndex - 1],
+                        southRow = emptyBoard[rowIndex + 1];
+
+                    if (northRow) {
+                        hex.northEast = northRow[eastIndex];
+                        hex.northWest = northRow[westIndex];
+                    }
+
+                    if (southRow) {
+                        hex.southEast = southRow[eastIndex];
+                        hex.southWest = southRow[westIndex];
+                    }
 
                     var hexBridgeDirections = _.chain(rowBridgeDirections[colIndex].split(' '))
                         .compact()
@@ -112,34 +143,7 @@ define([
                         .object()
                         .value();
 
-                    return new UniqueModel(Hex, {
-                        terrain: Board.TERRAIN_MAPPING[terrain],
-                        bridgeDirections: hexBridgeDirections
-                    });
-                }));
-            }));
-
-            // Set up adjacency between Hexes
-            emptyBoard.each(function (row, rowIndex) {
-                row.each(function (hex, colIndex) {
-                    hex.east = row.at(colIndex + 1);
-                    hex.west = row.at(colIndex - 1);
-
-                    var colOffset = (rowIndex % 2),
-                        eastIndex = colIndex + colOffset,
-                        westIndex = colIndex + colOffset - 1,
-                        northRow = board.at(rowIndex - 1),
-                        southRow = board.at(rowIndex + 1);
-
-                    if (northRow) {
-                        hex.northEast = northRow.at(eastIndex);
-                        hex.northWest = northRow.at(westIndex);
-                    }
-
-                    if (southRow) {
-                        hex.southEast = southRow.at(eastIndex);
-                        hex.southWest = southRow.at(westIndex);
-                    }
+                    hex.bridgeDirections = hexBridgeDirections;
                 });
             });
 

@@ -11,6 +11,18 @@ define([
 
     Hex
 ) {
+    var addIncome = function (attr, num, player) {
+        var income = _.clone(player.get('income'));
+        income[attr] += num;
+        player.set({ income: income });
+    };
+
+    var structureBonus = function (structureNames, victoryPoints, player, newStructure) {
+        structureNames = structureNames.split(',');
+        if (_.contains(structureNames, newStructure.get('type')))
+            player.addVictoryPoints(victoryPoints);
+    };
+
     var Round = Backbone.Model.extend({
         defaults: {
             phase: 0,
@@ -70,35 +82,36 @@ define([
             COMPLETE: 4 // Round is complete
         },
 
+        // TODO handle cult scoring
         TILES: {
             water: {
                 priests: {
                     eventName: 'build:structure',
-                    handler: _.partial(Round.structureBonus, 'dwelling', 2)
+                    handler: _.partial(structureBonus, 'dwelling', 2)
                 },
                 spades: {
                     eventName: 'build:structure',
-                    handler: _.partial(Round.structureBonus, 'tradingHouse', 3)
+                    handler: _.partial(structureBonus, 'tradingHouse', 3)
                 }
             },
             fire: {
                 power: {
                     eventName: 'build:structure',
-                    handler: _.partial(Round.structureBonus, 'dwelling', 2)
+                    handler: _.partial(structureBonus, 'dwelling', 2)
                 },
                 workers: {
                     eventName: 'build:structure',
-                    handler: _.partial(Round.structureBonus, 'stronghold,sanctuary', 5)
+                    handler: _.partial(structureBonus, 'stronghold,sanctuary', 5)
                 }
             },
             air: {
                 spades: {
                     eventName: 'build:structure',
-                    handler: _.partial(Round.structureBonus, 'tradingHouse', 3)
+                    handler: _.partial(structureBonus, 'tradingHouse', 3)
                 },
                 workers: {
                     eventName: 'build:structure',
-                    handler: _.partial(Round.structureBonus, 'stronghold,sanctuary', 5)
+                    handler: _.partial(structureBonus, 'stronghold,sanctuary', 5)
                 }
             },
             earth: {
@@ -115,18 +128,6 @@ define([
                     }
                 }
             }
-        },
-
-        addIncome: function (attr, num, player) {
-            var income = _.clone(player.get('income'));
-            income[attr] += num;
-            player.set({ income: income });
-        },
-
-        structureBonus: function (structureNames, victoryPoints, player, newStructure) {
-            structureNames = structureNames.split(',');
-            if (_.contains(structureNames, newStructure.get('type')))
-                player.addVictoryPoints(victoryPoints);
         },
 
         expand: function () {

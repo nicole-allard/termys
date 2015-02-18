@@ -1,7 +1,6 @@
 define([
     'backbone',
 
-    'presets/PresetGames',
     'models/common/UniqueModel',
     'models/Board',
     'models/Player',

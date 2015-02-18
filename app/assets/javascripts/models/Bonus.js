@@ -162,7 +162,7 @@ define([
         }
     });
 
-    UniqueModel.add('Bonus', Bonus);
+    UniqueModel.addType('Bonus', Bonus);
 
     return Bonus;
 });

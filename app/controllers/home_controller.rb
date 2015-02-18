@@ -1,4 +1,25 @@
+require 'digest/md5'
+require 'json'
+
 class HomeController < ApplicationController
+
+    def index
+        # Pass to the template a mapping of all javascript asset paths to
+        # a path with a busting parameter appended. The parameter is an
+        # MD5 hash of the file contents, so that individual files will be
+        # busted as they are modified, and unmodified files will remain
+        # cached. This mapping is passed to requirejs' path config.
+        asset_hash = Dir.chdir("app/assets/javascripts") do
+             Hash[Dir.glob("**/*.js").map do |filename|
+                file = File.open(filename, 'r')
+                retval = [filename[0..-4], "#{filename}?bust=#{Digest::MD5.hexdigest(file.read)}"]
+                file.close
+                retval
+            end]
+        end
+
+        @asset_hash = asset_hash.to_json
+    end
 
     # Returns the current active game, or creates a new game if an active
     # game does not exist.
@@ -96,6 +117,7 @@ class HomeController < ApplicationController
             :players => game.players
         }
     end
+
 
     # player connects to server, server looks for latest game in db, if game is in
     # progress go to the request to join

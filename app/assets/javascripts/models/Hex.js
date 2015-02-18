@@ -60,22 +60,28 @@ define([
                     .map(function (direction) {
                         var hex;
                         switch (direction) {
-                        case 'n':
-                            return this.northEast ? this.northEast.northWest : this.northWest.northEast;
-                        case 'ne':
-                            return this.northEast.east;
-                        case 'se':
-                            return this.southEast.east;
-                        case 's':
-                            return this.southEast ? this.southEast.southWest : this.southWest.southEast;
-                        case 'sw':
-                            return this.southWest.west;
-                        case 'nw':
-                            return this.northWest.west;
+                        case 'north':
+                            hex = this.northEast ? this.northEast.northWest : this.northWest.northEast;
+                            break;
+                        case 'northEast':
+                            hex = this.northEast.east;
+                            break;
+                        case 'southEast':
+                            hex = this.southEast.east;
+                            break;
+                        case 'south':
+                            hex = this.southEast ? this.southEast.southWest : this.southWest.southEast;
+                            break;
+                        case 'southWest':
+                            hex = this.southWest.west;
+                            break;
+                        case 'northWest':
+                            hex = this.northWest.west;
+                            break;
                         }
 
                         return [direction, hex];
-                    })
+                    }, this)
                     .object()
                     .value()
                 );
@@ -225,6 +231,8 @@ define([
 
         // TODO implement expand
     });
+
+    UniqueModel.addType('Hex', Hex);
 
     return Hex;
 });
