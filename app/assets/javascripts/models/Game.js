@@ -147,7 +147,13 @@ define([
         },
 
         save: function () {
-            // TODO send the result of toDbJSON to backend.
+            $.ajax({
+                type: 'PUT',
+                url: '/home/update_game',
+                data: {
+                    game: this.toDbJSON()
+                }
+            });
         }
 
         // TODO implement:

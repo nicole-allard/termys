@@ -47,6 +47,56 @@ class HomeController < ApplicationController
         }
     end
 
+    def update_game
+        game = Game.last
+        if !game
+            err = "No game in progress"
+        elsif game.state == "complete"
+            err = "Cannot update completed game"
+        end
+
+        if err
+            return render :json => { :error => err }, :status => 403
+        end
+
+        updated_game = params[:game]
+        updated_players = updated_game.delete(:players)
+
+        game.update updated_game
+        updated_players.each do |player_changes|
+            Player.find(player_changes.id).update(player_changes)
+        end
+
+        return render :json => {
+            :game => game,
+            :players => game.players
+        }
+    end
+
+    def join_game
+        game = Game.last
+        players = game && game.players
+
+        if !game
+            err = "No game in progress"
+        elsif game.state === "complete"
+            err = "Cannot join completed game"
+        elsif players && players.length > 5
+            err = "Cannot join already full game"
+        end
+
+        if err
+            return render :json => { :error => err}, :status => 403
+        end
+
+        Player.create(:name => params[:name], :game_id => game.id)
+
+        return render :json => {
+            :game => game,
+            :players => game.players
+        }
+    end
+
     # player connects to server, server looks for latest game in db, if game is in
     # progress go to the request to join
     #

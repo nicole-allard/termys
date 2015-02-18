@@ -56,33 +56,20 @@ define([
         initialize: function () {
             this.on('change:name', this.updateCookie);
             this.on('change', this.updateProperties);
+        },
 
-            var App = require('app');
-            this.app = App.get();
-            if (this.app.game)
-                this.listenToGame(this.app.game);
-            else
-                this.listenTo(this.app, 'change:game', this.listenToGame);
+        isRegistered: function () {
+            // A player who has signed in on the front end will have a name,
+            // but it's not until an associated player model has been created
+            // in the database and the id synced to the frontend that the player
+            // is registered with the game.
+            return !!this.get('id');
         },
 
         updateProperties: function () {
             if (this.get('bonus')) {
                 this.bonus = UniqueModel.get(Bonus, this.get('bonus'));
                 this.unset('bonus');
-            }
-        },
-
-        listenToGame: function (game) {
-            this.listenTo(game, 'changeProperty:activePlayer', this.handleStateChange);
-            this.listenTo(game, 'change:state', this.handleStateChange);
-        },
-
-        handleStateChange: function () {
-            var game = this.app.game;
-            if (game.activePlayer !== this) {
-                if (game.get('state') === 'config')
-                    this.app.handleConfiguration();
-                // TODO handle other states
             }
         },
 

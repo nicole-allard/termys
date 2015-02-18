@@ -1,0 +1,15 @@
+Current Players:
+:each player in players
+    player.name
+    :if player.id === currentPlayer.id
+        (you)
+
+:if currentPlayerIsRegistered
+    %button.js-start-game
+        Start Game with
+        = players.length
+        player(s)
+:if !currentPlayerIsRegistered
+    %button.js-join-game
+        Join Game as
+        = currentPlayer.name

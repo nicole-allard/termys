@@ -53,7 +53,7 @@ define([
             response = Poller.camelizeObject(response);
             response.game.players = response.players;
 
-            if (!this.app.player.id) {
+            if (!this.app.player.isRegistered()) {
                 // This user's player has never been synced with the backend.
                 // Since all frontend syncing is done via IDs, make sure to
                 // properly set the player ID.

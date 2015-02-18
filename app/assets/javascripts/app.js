@@ -39,7 +39,7 @@ define([
                 usernamePromise.resolve();
             });
 
-            this.showView(new LoginView({
+            this._showView(new LoginView({
                 model: this.player
             }));
 
@@ -49,25 +49,38 @@ define([
         setGame: function (game) {
             this.game = game;
             this.trigger('change:game', game);
+
+            this.listenTo(game, 'changeProperty:activePlayer', this.handleStateChange);
+            this.listenTo(game, 'change:state', this.handleStateChange);
         },
 
-        /**
-         * Handles the configuration state of the game when this user is the
-         * active configuring player.
-         */
-        handleConfirguation: function () {
-            // TODO show the configuration view to let the user choose how
-            // the game should be configured
-            // For now, don't allow config, everything goes by preset values
-            this.game.set({
-                config: 'preset',
-                state: 'bonus'
-            });
+        handleStateChange: function () {
+            // The joining state is special in that it's the only one handled by
+            // all players at once, not just by the active player
+            if (this.game.get('state') === 'joining') {
+                this._showView(new JoiningView({
+                    app: this
+                }));
+                return;
+            }
 
-            this.game.save();
+            // Only allow the active player to handle the current state
+            // so that we don't have multiple players acting at once.
+            // Once the active players finishes, the state and/or the
+            // active player will change.
+            if (this.game.activePlayer !== this.player)
+                return;
+
+            switch(this.game.get('state')) {
+            case 'config':
+                this._showView(new ConfigurationView({
+                    app: this
+                }));
+                break;
+            }
         },
 
-        showView: function (view) {
+        _showView: function (view) {
             $('body').html(view.render().$el);
         }
     });
