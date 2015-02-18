@@ -17,12 +17,19 @@ define([
         //     southWest: Hex,
         //     west: Hex,
         //     northWest: Hex,
-        //     structure: Structure
+        //     structure: Structure,
+        //
+        //     // Keys represent the directions in which a bridge could be built,
+        //     // value is either the Hex accross a bridge that has been built,
+        //     // or null if no bridge exists.
+        //     bridgeDirections : {}
         // },
         //
         defaults: {
             terrain: null,
-            bridgeDirections : [],
+
+            // Whether or not there is a key on this hex space, indicating that
+            // it is part of an existing town.
             key: false
         },
 
@@ -41,6 +48,39 @@ define([
 
                 this.trigger('changeProperty:structure');
                 this.unset('structure');
+            }
+
+            var bridgeDirectionAttrs = this.get('bridgeDirections');
+            if (bridgeDirectionAttrs) {
+                // If bridgeDirections was sent from the server, it will be an array
+                // of directions in which a bridge has been built. Ensure that the FE
+                // object is updated with the now connected hexes on the other sides
+                // of these bridges.
+                _.extend(this.bridgeDirections, _.chain(bridgeDirectionAttrs)
+                    .map(function (direction) {
+                        var hex;
+                        switch (direction) {
+                        case 'n':
+                            return this.northEast ? this.northEast.northWest : this.northWest.northEast;
+                        case 'ne':
+                            return this.northEast.east;
+                        case 'se':
+                            return this.southEast.east;
+                        case 's':
+                            return this.southEast ? this.southEast.southWest : this.southWest.southEast;
+                        case 'sw':
+                            return this.southWest.west;
+                        case 'nw':
+                            return this.northWest.west;
+                        }
+
+                        return [direction, hex];
+                    })
+                    .object()
+                    .value()
+                );
+
+                this.unset('bridgeDirections');
             }
         },
 
@@ -137,11 +177,24 @@ define([
         //     return Infinity;
         // },
 
+        getDirectlyAdjacentHexes: function () {
+            var directlyAdjacentHexes = _.chain(Hex.DIRECTIONS)
+                .map(function (direction) {
+                    return this[direction];
+                })
+                .union(_.values(this.bridgeDirections))
+                .compact()
+                .value();
+
+            return directlyAdjacentHexes;
+        },
 
         // TODO implement get structure collection
 
         toDbJSON: function () {
-
+            // TODO return structure, bridge directions (as an array), and key data.
+            // Don't bother sending terrains or possible bridge directions that don't
+            // have bridges built
         }
     }, {
         DIRECTIONS: [

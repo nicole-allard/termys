@@ -1,7 +1,9 @@
 define([
     'backbone',
 
+    'presets/PresetGames',
     'models/common/UniqueModel',
+    'models/Board',
     'models/Player',
     'models/Round',
     'models/Hex'
@@ -9,6 +11,7 @@ define([
     Backbone,
 
     UniqueModel,
+    Board,
     Player,
     Round,
     Hex
@@ -19,7 +22,7 @@ define([
         //     blockingPlayers: Collection(Player),
         //     players: Collection(Player),
         //     rounds: Collection(Round),
-        //     board: [[Hex]],
+        //     board: Board,
         //     cults: { type: CultTrack },
         //     keys: Collection(TownKey),
         //     favorTiles: Collection(FavorTile),
@@ -32,6 +35,9 @@ define([
 
         initialize: function (attrs, options) {
             this.app = options.app;
+
+            // Create an empty board for this game
+            this.board = new Board();
 
             this.on('change', this.updateProperties);
             this.updateProperties();
@@ -116,57 +122,16 @@ define([
             this.trigger('changeProperty:activePlayer');
         },
 
+        /**
+         * Forwards board information to the Board model to handle
+         * updating hex data
+         */
         updateBoard: function () {
-            if (!this.board)
-                this.board = this.initializeBoard(this.get('board'));
-            else {
-                _.each(this.get('board'), function (row) {
-                    _.each(row, function (hex) {
-                        // Since the board has already been initialized, the unique hex
-                        // models should all exist already. This should simply be updating
-                        // their state. Something is very wrong if get returns null.
-                        UniqueModel.get(Hex, hex.id).set(hex);
-                    });
-                });
-            }
-
+            this.board.set({
+                hexes: this.get('board')
+            });
             this.unset('board');
             this.trigger('changeProperty:board');
-        },
-
-        initializeBoard: function (board) {
-            // Replace objects in board array with Hex models
-            _.each(board, function (row, rowIndex) {
-                _.each(row, function (hex, colIndex) {
-                    board[rowIndex][colIndex] = new UniqueModel(Hex, hex);
-                });
-            });
-
-            // Set up adjacency between Hexes
-            _.each(board, function (row, rowIndex) {
-                _.each(row, function (hex, colIndex) {
-                    hex.east = board[rowIndex][colIndex + 1];
-                    hex.west = board[rowIndex][colIndex - 1];
-
-                    var colOffset = (rowIndex % 2),
-                        eastIndex = colIndex + colOffset,
-                        westIndex = colIndex + colOffset - 1,
-                        northRow = board[rowIndex - 1],
-                        southRow = board[rowIndex + 1];
-
-                    if (northRow) {
-                        hex.northEast = northRow[eastIndex];
-                        hex.northWest = northRow[westIndex];
-                    }
-
-                    if (southRow) {
-                        hex.southEast = southRow[eastIndex];
-                        hex.southWest = southRow[westIndex];
-                    }
-                });
-            });
-
-            return board;
         },
 
         /**
@@ -178,11 +143,7 @@ define([
             json.players = _.invoke(this.players, 'toDbJSON');
             json.activePlayerId = this.activePlayer.id;
             json.rounds = _.invoke(this.rounds, 'toDbJSON');
-            json.board = _.map(this.board, function (row) {
-                return _.map(row, function (hex) {
-                    return hex.toDbJSON();
-                });
-            });
+            json.board = this.board.toDbJSON();
         },
 
         save: function () {

@@ -14,14 +14,15 @@ class Game < ActiveRecord::Base
     # blocking_players: json array of ids of players who are blocking the current round/action
     #                   from completing
     #
-    # hexes: json 2D array of hex objects. FE knows how to build the board from this array.
+    # hexes: json 2D array of things on hexes. FE knows the layout of the hexes and their terrains.
     #           hex:
-    #               terrain: plains/swamp/lakes/forest/mountains/wasteland/desert
     #               key: true/false - whether or not there is a town key on this hex
-    #               bridge_directions: optional JSON array of direction strings: N, NE, SE, S, SW, NW
+    #               bridge_directions: optional JSON array of direction strings: n, ne, se, s, sw, nw
+    #                                  representing the direction in which bridges have been built
+    #                                  (allowed directions are managed on the FE)
     #               structure: JSON object
     #                   player_id
-    #                   type: bridge/dwelling/tradingHouse/temple/stronghold/sanctuary
+    #                   type: dwelling/tradingHouse/temple/stronghold/sanctuary
     #
     # rounds: json array objects (id, phase)
     #           ids are strings of the form cultName:bonus (ex: water:spade). FE can determine from
