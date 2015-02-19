@@ -18,7 +18,7 @@ define([
     var Game = Backbone.Model.extend({
         // properties: {
         //     activePlayer: Player,
-        //     blockingPlayers: Collection(Player),
+        //     blockingPlayers: { blocked: Collection(Player)}
         //     players: Collection(Player),
         //     rounds: Collection(Round),
         //     board: Board,
@@ -38,6 +38,13 @@ define([
             // Create an empty board for this game
             this.board = new Board();
 
+            // Object is created on the frontend before being populated
+            // by the backend
+            this.blockingPlayers = {
+                phase: new Backbone.Collection(),
+                action: new Backbone.Collection()
+            };
+
             this.on('change', this.updateProperties);
             this.updateProperties();
         },
@@ -49,9 +56,6 @@ define([
          * (basically anything that's a model or collection)
          */
         updateProperties: function () {
-            // Collection is created on the frontend before being populated
-            this.blockingPlayers = new Backbone.Collection();
-
             if (this.get('players'))
                 this.updateCollection('players', Player);
 
@@ -71,6 +75,7 @@ define([
             // cults
             // keys
             // favorTiles
+            // blockingPlayers
         },
 
         /**
@@ -115,7 +120,7 @@ define([
          * Once the activePlayer is set, deletes the attribute.
          */
         updateActivePlayer: function () {
-            this.activePlayer = this.players.find(this.get('activePlayerId'));
+            this.activePlayer = this.players.findWhere({ id: this.get('activePlayerId') });
 
             this.unset('activePlayerId');
             this.trigger('changeProperty:activePlayer');

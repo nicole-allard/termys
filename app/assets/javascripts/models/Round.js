@@ -56,12 +56,12 @@ define([
         },
 
         beginIncome: function () {
-            // Mark all players as blocking the income phase from completing
-            var game = this.app.game;
-            game.blockingPlayers.reset(_.pluck(game.players, 'id'));
+            this.resetPhaseBlocking();
         },
 
         beginActions: function () {
+            this.resetPhaseBlocking();
+
             var actionBonus = this.get('actionBonus');
             _.each(this.app.game.players.each, _.bind(function (player) {
                 this.listenTo(player, actionBonus.eventName, actionBonus.handler);
@@ -69,7 +69,14 @@ define([
         },
 
         beginCleanup: function () {
+            this.resetPhaseBlocking();
             // TODO unbind action listeners
+        },
+
+        resetPhaseBlocking: function () {
+            // Mark all players as blocking the income phase from completing
+            var game = this.app.game;
+            game.blockingPlayers.phase.reset(_.pluck(game.players, 'id'));
         }
 
         // TODO implement toDbJSON

@@ -10,7 +10,7 @@ define([
     joiningTemplate
 ) {
     var JoiningView = Marionette.ItemView.extend({
-        template: joiningTemplate,
+        template: Haml(joiningTemplate),
 
         event: {
             'click .js-join-game': 'joinGame',

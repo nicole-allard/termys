@@ -82,7 +82,7 @@ define([
                         // synced player details
                         new UniqueModel(Player, playerDetails);
                     }
-                });
+                }, this);
 
                 // TODO check if forceSync, (active player may be restarting his turn)
             } else {

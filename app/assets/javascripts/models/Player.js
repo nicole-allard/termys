@@ -1,4 +1,5 @@
 define([
+    'underscore',
     'backbone',
 
     'models/common/UniqueModel',
@@ -7,6 +8,7 @@ define([
     'utils/cookies',
     'utils/actions'
 ], function (
+    _,
     Backbone,
 
     UniqueModel,
@@ -53,9 +55,11 @@ define([
             spades: 0
         },
 
-        initialize: function () {
+        initialize: function (attributes, options) {
             this.on('change:name', this.updateCookie);
             this.on('change', this.updateProperties);
+
+            this.app = options.app;
         },
 
         isRegistered: function () {
@@ -64,6 +68,10 @@ define([
             // in the database and the id synced to the frontend that the player
             // is registered with the game.
             return !!this.get('id');
+        },
+
+        isActivePlayer: function () {
+            return this.app.game && this === this.app.game.activePlayer;
         },
 
         updateProperties: function () {
@@ -85,6 +93,12 @@ define([
             });
         },
 
+        toJSON: function () {
+            return _.extend({
+                isActivePlayer: this.isActivePlayer()
+            }, this.attributes);
+        },
+
         toDbJSON: function () {
             return _.extend({
                 bonus: this.bonus && this.bonus.toDbJSON() || null
@@ -93,11 +107,13 @@ define([
     }, {
         USER_COOKIE: 'username',
 
-        initializeFromCookie: function () {
+        initializeFromCookie: function (app) {
             var val = cookies.read(Player.USER_COOKIE);
             if (val)
                 return new Player({
                     name: val
+                }, {
+                    app: app
                 });
         }
     });

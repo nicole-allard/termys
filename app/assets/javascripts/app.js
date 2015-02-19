@@ -7,6 +7,8 @@ define([
     'models/Player',
 
     'views/LoginView',
+    'views/JoiningView',
+    'views/ConfigurationView',
 
     'overrides'
 ], function (
@@ -17,7 +19,9 @@ define([
     Poller,
     Player,
 
-    LoginView
+    LoginView,
+    JoiningView,
+    ConfigurationView
 ) {
     var AppRouter = Marionette.AppRouter.extend({
         routes: {},
@@ -29,12 +33,12 @@ define([
         },
 
         initUser: function () {
-            this.player = Player.initializeFromCookie();
+            this.player = Player.initializeFromCookie(this);
             if (this.player)
                 return this.player;
 
             var usernamePromise = $.Deferred();
-            this.player = new Player();
+            this.player = new Player({}, { app: this });
             this.listenTo(this.player, 'change:name', function () {
                 usernamePromise.resolve();
             });
@@ -52,26 +56,17 @@ define([
 
             this.listenTo(game, 'changeProperty:activePlayer', this.handleStateChange);
             this.listenTo(game, 'change:state', this.handleStateChange);
+
+            this.handleStateChange();
         },
 
         handleStateChange: function () {
-            // The joining state is special in that it's the only one handled by
-            // all players at once, not just by the active player
-            if (this.game.get('state') === 'joining') {
+            switch(this.game.get('state')) {
+            case 'joining':
                 this._showView(new JoiningView({
                     app: this
                 }));
                 return;
-            }
-
-            // Only allow the active player to handle the current state
-            // so that we don't have multiple players acting at once.
-            // Once the active players finishes, the state and/or the
-            // active player will change.
-            if (this.game.activePlayer !== this.player)
-                return;
-
-            switch(this.game.get('state')) {
             case 'config':
                 this._showView(new ConfigurationView({
                     app: this

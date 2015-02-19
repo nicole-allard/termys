@@ -9,8 +9,12 @@ class Game < ActiveRecord::Base
     #
     # active_player_id: id of the active player
     #
-    # blocking_players: json array of ids of players who are blocking the current round/action
-    #                   from completing
+    # blocking_players: json object. keys are what is blocked from completion by the player ids
+    #                   listed in the array value. Object only contains nonempty lists, or is null.
+    #                   {
+    #                       phase: [1,2,3],
+    #                       action: [3,4]
+    #                   }
     #
     # hexes: json 2D array of things on hexes. FE knows the layout of the hexes and their terrains.
     #           hex:

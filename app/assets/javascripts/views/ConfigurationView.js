@@ -10,7 +10,13 @@ define([
     configurationTemplate
 ) {
     var ConfigurationView = Marionette.ItemView.extend({
-        template: configurationTemplate,
+        template: Haml(configurationTemplate),
+        templateHelpers: function () {
+            return {
+                currentPlayer: this.app.player.toJSON(),
+                activePlayer: this.app.game.activePlayer.toJSON()
+            };
+        },
 
         initialize: function (options) {
             this.app = options.app;

@@ -1,11 +1,14 @@
-Game Options
-%form
-    %label
-        %input.js-config-type{ type: 'radio', checked: true, name: 'config', value: 'preset' }
-        .title
-            Predefined
-        .sub
-            Use the recommended characters and setup
+:if (currentPlayer.isActivePlayer)
+    Game Options
+    %form
+        %label
+            %input.js-config-type{ type: 'radio', checked: true, name: 'config', value: 'preset' }
+            .title
+                Predefined
+            .sub
+                Use the recommended characters and setup
 
-    %button.js-submit
-        Next
+        %button.js-submit
+            Next
+:else
+    Please wait. #{activePlayer.name} is configuring the game.
