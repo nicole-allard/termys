@@ -12,13 +12,14 @@ define([
     var JoiningView = Marionette.ItemView.extend({
         template: Haml(joiningTemplate),
 
-        event: {
+        events: {
             'click .js-join-game': 'joinGame',
             'click .js-start-game': 'startGame'
         },
 
         initialize: function (options) {
             this.app = options.app;
+
             this.listenTo(this.app.game, 'changeProperty:players', this.render);
         },
 
@@ -27,19 +28,25 @@ define([
                 currentPlayer = this.app.player;
 
             return {
-                players: players.toJSON(),
                 currentPlayer: currentPlayer.toJSON(),
-                currentPlayerIsRegistered: currentPlayer.isRegistered() && _.contains(players, currentPlayer)
+                currentPlayerIsRegistered: currentPlayer.isRegistered() && players.contains(currentPlayer),
+                players: players.toJSON()
             };
         },
 
         joinGame: function () {
+            // TODO show spinner, takes awhile for list to update
+            var self = this;
             $.ajax({
-                type: 'PUT',
+                type: 'POST',
                 url: '/home/join_game',
                 data: {
                     name: this.app.player.get('name')
                 }
+            }).then(function (response) {
+                self.app.poller.parse(response);
+            }, function (jqXHR, testStatus, errorThrown) {
+                alert('Could not join this game: ' + errorThrown);
             });
         },
 

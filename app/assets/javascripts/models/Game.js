@@ -120,10 +120,13 @@ define([
          * Once the activePlayer is set, deletes the attribute.
          */
         updateActivePlayer: function () {
-            this.activePlayer = this.players.findWhere({ id: this.get('activePlayerId') });
+            var newActivePlayer = this.players.findWhere({ id: this.get('activePlayerId') });
+            if (newActivePlayer !== this.activePlayer) {
+                this.activePlayer = newActivePlayer;
+                this.trigger('changeProperty:activePlayer');
+            }
 
             this.unset('activePlayerId');
-            this.trigger('changeProperty:activePlayer');
         },
 
         /**

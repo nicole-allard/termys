@@ -1,6 +1,7 @@
 class Game < ActiveRecord::Base
     has_many :players
 
+    # TOD verify that players.length <= 5
     # TODO verify the value of state
     # TODO active_player_id is in players
 

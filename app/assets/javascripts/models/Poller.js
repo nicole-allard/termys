@@ -80,7 +80,7 @@ define([
                     if (forceSync || playerDetails.id !== this.app.player.id) {
                         // Update the existing, or create a new, player as per the
                         // synced player details
-                        new UniqueModel(Player, playerDetails);
+                        new UniqueModel(Player, playerDetails, { app: this.app });
                     }
                 }, this);
 

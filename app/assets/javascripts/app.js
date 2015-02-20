@@ -77,6 +77,7 @@ define([
 
         _showView: function (view) {
             $('body').html(view.render().$el);
+            view.triggerMethod('show');
         }
     });
 
