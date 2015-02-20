@@ -26,7 +26,10 @@ define([
             'click .js-submit': 'finishConfiguration'
         },
 
-        finishConfiguration: function () {
+        finishConfiguration: function (e) {
+            if (e)
+                e.preventDefault();
+
             var configType = this.$('.js-config-type').val();
 
             // Indicate the completion of the configuration state and save
@@ -37,6 +40,8 @@ define([
             });
 
             this.app.game.save();
+
+            return false;
         }
     });
 

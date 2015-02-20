@@ -57,4 +57,5 @@ Rails.application.routes.draw do
   #   end
 
   get ':controller(/:action(/:id(.:format)))'
+  post ':controller(/:action(/:id(.:format)))'
 end

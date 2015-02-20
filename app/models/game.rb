@@ -16,7 +16,7 @@ class Game < ActiveRecord::Base
     #                       action: [3,4]
     #                   }
     #
-    # hexes: json 2D array of things on hexes. FE knows the layout of the hexes and their terrains.
+    # board: json 2D array of things on hexes. FE knows the layout of the hexes and their terrains.
     #           hex:
     #               key: true/false - whether or not there is a town key on this hex
     #               bridge_directions: optional JSON array of direction strings: n, ne, se, s, sw, nw

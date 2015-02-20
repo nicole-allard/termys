@@ -143,20 +143,26 @@ define([
          * be save to the db and parsed by the frontend models
          */
         toDbJSON: function () {
-            var json = _.clone(_.pick(this.attributes, _.keys(this.defaults)));
-            json.players = _.invoke(this.players, 'toDbJSON');
-            json.activePlayerId = this.activePlayer.id;
-            json.rounds = _.invoke(this.rounds, 'toDbJSON');
-            json.board = this.board.toDbJSON();
+            return _.extend({
+                players: this.players.invoke('toDbJSON'),
+                activePlayerId: this.activePlayer.id,
+                rounds: this.rounds ? JSON.stringify(this.rounds.invoke('toDbJSON')) : null,
+                board: JSON.stringify(this.board.toDbJSON())
+            }, _.pick(this.attributes, _.keys(this.defaults)));
         },
 
         save: function () {
-            $.ajax({
-                type: 'PUT',
+            var self = this;
+            return $.ajax({
+                type: 'POST',
                 url: '/home/update_game',
                 data: {
                     game: this.toDbJSON()
                 }
+            }).then(function (response) {
+                self.app.poller.parse(response);
+            }, function (jqXHR, testStatus, errorThrown) {
+                alert('Could not save your game: ' + errorThrown);
             });
         }
 

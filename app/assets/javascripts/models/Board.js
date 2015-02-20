@@ -33,7 +33,8 @@ define([
                 _.each(this.hexes, function (row, rowIndex) {
                     var rowData = hexesData[rowIndex];
                     _.each(row, function (hex, colIndex) {
-                        hex.set(rowData[colIndex]);
+                        if (hex)
+                            hex.set(rowData[colIndex]);
                     });
                 });
 
@@ -44,7 +45,9 @@ define([
         toDbJSON: function () {
             return this.hexes.map(function (row) {
                 return row.map(function (hex) {
-                    return hex.toDbJSON();
+                    return hex ?
+                        hex.toDbJSON() :
+                        null;
                 });
             });
         }

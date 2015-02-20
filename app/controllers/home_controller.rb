@@ -80,12 +80,12 @@ class HomeController < ApplicationController
             return render :json => { :error => err }, :status => 403
         end
 
-        updated_game = params[:game]
-        updated_players = updated_game.delete(:players)
+        updated_game = JSON::parse(params["game"])
+        updated_players = updated_game.delete("players")
 
         game.update updated_game
         updated_players.each do |player_changes|
-            Player.find(player_changes.id).update(player_changes)
+            Player.find(player_changes["id"]).update(player_changes)
         end
 
         return render :json => {
@@ -119,100 +119,131 @@ class HomeController < ApplicationController
     end
 
 
-    # player connects to server, server looks for latest game in db, if game is in
-    # progress go to the request to join
-    #
     # picking a game back up:
-    # check for user id cookie, or prompt for name if no cookie
+    # check for user name cookie, or prompt for name if no cookie
+    # (TODO use google auth)
+    # some handwaviness here, will worry about rejoining an existing game later
     #
     # starting a new game:
-    # create a new game, save to db, state is config, everything else is null.
+    # all players hitting the page for the first time will check for auth. (a
+    # username cookie for now, TODO use google auth). If user is not authenticated,
+    # will prompt user to authenticate, (for now this means entering a username),
+    # which will set an auth cookie.
     #
-    # if a player hits the page while in config mode, send them the game with the
-    # config state. browsers will show a message: 'game is being configured, pls
-    # wait to join', and start pinging for updates.
-    # show first user game config options:
+    # once a player is authenticated, they'll hit the get or create game endpoint.
+    # Assuming no game in progress, the first of the players to try will create
+    # the game, set state to config, set self as the active player (configuring
+    # player), save to db. other players will continue polling for game and will
+    # eventually pull in a game in config state for which they are not the active
+    # player, so they'll just keep polling till something changes.
+    #
+    # config state:
+    # when non active players load the game in config mode, show them a
+    # message: game is being configured, please wait to join. keep polling till
+    # something changes.
+    # when the active player loads the game in config mode, show them config
+    # options:
     #  - use preset config (including characters, board state, etc)
-    #  - choose characters, random board state
-    #  - random characters
-    # user's selection will be sent back to server, user will start pinging for
-    # updates
-    # server will pull the latest game, update state to joining, save board.
-    # users who are pinging will get the board with state joining, and ask player
-    # to sumit a unique name if they'd like to join. frontend will set a cookie
-    # with the player's name (in case of refreshing browsers), and save the name
-    # locally.
-    # server upon receving request to join will check if game is active or joining.
-    # if joining, add players with the given name, but no race or anything, as long
-    # as the name is unique. if game is active, do nothing, player will take the place
-    # of the existing player.
-    # users who are pinging should get updated player list and show the list
-    # to the user, along with a 'start now' button.
-    # server upon receiving a start now request will check the game config:
+    #  - randomize all the things
+    #  - choose all the things
+    # user's selection will update the game config type, set state to joining,
+    # save game, continue polling
     #
-    # choose characters:
-    # update game state to drafting.
+    # joining state:
+    # when players load the game in joining mode, show them a list of players who
+    # have joined. if they have not yet joined, show them a button which will send
+    # a request to the server to add them to the game. polling users will get updated
+    # lists as everybody joins.
+    # the active player will also see a button to move to the next step with the players
+    # shown as joined. when this is clicked, a turn order will be randomly determine
+    # (how is this stored?), a starting player will be randomly determined. The round
+    # cards and bonus cards will be chosen (either randomly or using presets stored on
+    # the FE based on the number of players). Then the config will be checked to decide
+    # what state to go to next:
     #
-    # random:
-    # assign random races to players, pick random bonuses, round scoring tokens.
-    # update game state to dwellings.
+    # config != random characters:
+    # update game state to drafting, set the starting player as the active player,
+    # save the game
     #
-    # preset:
-    # count the number of players, pull up the game state and players for that number,
-    # start game: start income phase, and set game state to bonus.
+    # config == randomize:
+    # worry about this later, just get preset working right now.
+    #
+    # drafting state:
+    # if the non active player receives the game in drafting mode, it will show them the
+    # turn order, and the factions chosen so far. annoyingly, according to the rules we should be
+    # showing the board/round cards/bonus cards before players choose faction boards, cause i
+    # guess if you're particularly good at the game you can use that info when choosing a faction.
+    # not sure how to render all that on one page, may add that stuff in later and assume nobody
+    # is good enough at the game yet to utilize that info in this state.
+    # if the active player receives the game in drafting mode, it will show them the available
+    # factions. these are determined by the game config. If in preset, the set is defined on
+    # the FE for each number of players. If not, all factions are available. Remove from this
+    # set those that have already been chosen, show all the remaining faction boards so
+    # active player can choose one.
+    # once faction is chosen, FE will initialize the player model with the faction and all the
+    # starting values for that faction (stored on the FE).
+    # If this is the last player in turn order (ie: all the players have a faction chosen),
+    # change the game state to dwellings, set the active player back to the starting player,
+    # save the game. otherwise don't update the game, just save the player changes.
+    #
+    # dwelling state:
+    # when a player receives the game in dwelling mode, it will render the board and show
+    # the players in turn order and who is currently active.
+    # when the active player clicks on a valid space, the appropriate models will be updated
+    # (add a structure of type dwelling to the clicked hex, update player's remaining strctures
+    # and income). When the player clicks done, update the active player and save the game.
+    # Choosing the player to make active is done as follows: if there are players who do not
+    # have their first dwelling placed, choose the next player in turn order. If all players
+    # have 1 dwelling placed, choose the next player in reverse turn order (TODO need to handle
+    # factions that only start with 1 dwelling. probably that player will still be set to active
+    # player, and that player will handle skipping over the second selection phase). TODO how to
+    # notify special races who get more than 2 dwellings that it's their turn to place additional
+    # dwellings?)
+    # Once it's been determined that all dwellings are placed, update the game state to bonus,
+    # update the active player to the starting player, save the game.
+    #
+    # bonus state:
+    # still part of the setup, choosing the bonus to start the first round with.
+    # when a player receives the game in bonus mode, it will continue to show the board and
+    # players in turn order and the active player.
+    # the active player will be able to click on one of the bonus tiles to take it. the bonus
+    # model knows how to handle being taken by a player (updates income, listens for actions
+    # to handle action bonuses, etc). add the bonus to the player, remove it from the game,
+    # update the active player. if all players have bonuses, active player becomes starting
+    # player, otherwise the next in turn order. if all players have bonuses, sets the game
+    # state to active, save the game.
+    #
+    # active state:
+    # when a player receives the game in active state, find the active round/phase and handle
+    # it appropriately. some round/phases should be handled only by the active player, others
+    # are done in parallel. Each will check when necessary.
+    #
+    # if no active rounds, the active player will find the earliest round that has not begun
+    # and start it. the round model handles marking players as blocking the phase completion
+    # and saving the game.
+    #
+    # if in income mode, all players will update their resources and remove themselves from
+    # the phase blocking list, and save the game.
+    #
+    # if in income mode and there are no blocking players left, the active player will prompt
+    # the round to begin the action phase, and save the game.
+    #
+    # if in actions phase, the active player will be shown the 8 options for types of actions
+    # to take.
+    #   terraform/build will add buttons to all the empty land hexes on the board. When clicked,
+    #   check if hex is indirectly adjacent to an existing structure, or if player has some
+    #   exception to that rule. if hex is okay, pop up a modal asking the desired terrain type.
+    #   when selected, if cost is greater than number of spades in player's resources, pop up
+    #   a modal asking for payment. once paid, or if no payment needed, change space. if space
+    #   is now the correct terrain type for the player, pop up a modal offering a dwelling.
+    #   if accepted, pop up a modal asking for payment. once paid, add structure to hex.
+    #   TODO handle offering power to directly adjacent players. trigger event so that action
+    #   bonuses from rounds/bonuses/favor tiles will be called as needed.
+    #   TODO should we automically determine if a town was just founded and handle that as
+    #   necessary, or should the player need to click something to found the town?
     #
     #
-    # drafting:
-    # if user's browser receive the game in state drafting, it will check if this player
-    # is the earlier player in the player list that doesn't have a race associated, and
-    # if so, will show the available races for the user to choose from. otherwise will
-    # show the order of players, who is picking, and what has already been picked. once
-    # the user submits a selected race, server will update the player's race and generally
-    # initialize the player's starting shit. once the last player has a race, the server
-    # will change the state to dwellings, and randomly choose a starting player, and give
-    # that player a starting player token, and save to the game state the active player.
     #
-    # dwelling:
-    # if the user's browser receives the game in dwelling mode, it will render the whole
-    # game state and show both the starting player and the active player. the active player
-    # will have the option to select a space for their first dwelling. other players will
-    # receive an error on click. once a user chooses their space, and clicks done, it will
-    # submit that player's state and the current board state to the server. the server will
-    # save the new board and player states and update the active player to next in clockwise
-    # order, until all players have 1 dwelling placed, then will reverse the order, skipping
-    # over any special races that have all their starting dwellings out. once all
-    # players have placed 2 dwellings, server will check for special races placing additional
-    # dwellings, and update the active player appropriately. once the server determines that
-    # all players have all their dwellings out, it updates the game state to bonus, updates
-    # the active player to the player with the starting token.
-    #
-    # bonus:
-    # if the user's browser receives the game in bonus mode, and the current player is the
-    # active player, it will allow the active player to pick one bonus. send the updated
-    # board and player state with the bonus to the server. server saves player state and
-    # updates active player. once all players have a bonus, starts the income phase.
-    #
-    # taking a bonus:
-    # increase income as necessary, increase shipping if necessary
-    #
-    # server: starting income phase:
-    # create blocking list of players who must complete income, set phase to income,
-    # if game state is not yet active, set to active.
-    #
-    # active:
-    # income:
-    # browser checks the phase. if income, and player name is in the blocking income list,
-    # update player state with income and save updated player state. server will save updated
-    # player, and remove player from blocking list. once blocking list is empty, will start
-    # actions phase.
-    #
-    # server: starting actions phase:
-    # create a blocking list of players who must pass, set phase to actions, set the active
-    # player to the starting player.
-    #
-    # actions:
-    # browser checks the phase. if actions, and player is the active player, allow clicking on
-    # things. here's where it gets complicated!
     #
     # increase tracks:
     # add a button somewhere to move 1 up the track. when clicked, pop up a modal that asks for

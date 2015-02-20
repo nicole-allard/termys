@@ -1,4 +1,9 @@
 %script
     /* Set paths for all javascript assets with their cache busting parameters */
     require.config({ paths: #{@asset_hash.html_safe} });
+
+    /* Configure csrf token */
+    require(['jquery'], function ($) { $.ajaxSetup({ headers: { 'X-CSRF-Token': '#{form_authenticity_token.to_s}' } }); });
+
+    /* Begin game */
     require(['app'], function (app) { app.init(); });

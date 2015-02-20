@@ -22,8 +22,15 @@ define([
             return obj;
 
         _.each(obj, function (value, key) {
-            var snakeCaseKey = key.toSnakeCase();
-            obj[snakeCaseKey] = snakeCaseObject(obj[key]);
+            var snakeCaseKey = key.toSnakeCase(),
+                snakeCaseValue;
+
+            if ($.isArray(value))
+                snakeCaseValue = _.map(value, snakeCaseObject);
+            else
+                snakeCaseValue = snakeCaseObject(value);
+
+            obj[snakeCaseKey] = snakeCaseValue;
             if (snakeCaseKey !== key)
                 delete obj[key];
         });
@@ -38,8 +45,15 @@ define([
             url = undefined;
         }
 
-        if (options && options.data)
+        if (options && options.data) {
             options.data = snakeCaseObject(options.data);
+
+            _.each(options.data, function (value, key) {
+                if ($.isPlainObject(value))
+                    options.data[key] = JSON.stringify(value);
+            });
+        }
+
 
         return _ajax.call(this, url, options);
     });

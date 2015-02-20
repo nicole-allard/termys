@@ -49,7 +49,7 @@ define([
             }).then(_.bind(this.parse, this));
         },
 
-        parse: function (response) {
+        parse: function (response, forceSync) {
             response = Poller.camelizeObject(response);
             response.game.players = response.players;
 
@@ -77,13 +77,16 @@ define([
                 // This active player is this user's player. Don't want to overwrite
                 // the game or the active player state. Only update other players.
                 _.each(response.game.players, function (playerDetails) {
-                    if (playerDetails.id !== this.app.player.id) {
+                    if (forceSync || playerDetails.id !== this.app.player.id) {
                         // Update the existing, or create a new, player as per the
                         // synced player details
                         new UniqueModel(Player, playerDetails);
                     }
                 }, this);
 
+                if (forceSync) {
+                    this.app.game.set(response.game);
+                }
                 // TODO check if forceSync, (active player may be restarting his turn)
             } else {
                 // Update the existing game with

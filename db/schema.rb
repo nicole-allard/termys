@@ -40,6 +40,8 @@ ActiveRecord::Schema.define(version: 20150209045912) do
     t.integer  "shipping_value"
     t.integer  "land_skipping_value"
     t.text     "income"
+    t.string   "bonus"
+    t.integer  "num_keys"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

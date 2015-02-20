@@ -34,7 +34,7 @@ define([
             },
             workers: 0,
             priests: 0,
-            keys: 0,
+            numKeys: 0,
             supply: {
                 priests: 7,
                 dwellings: 10,
@@ -51,8 +51,11 @@ define([
                 coins: 0,
                 workers: 0,
                 priests: 0
-            },
-            spades: 0
+            }
+            // TODO figure out if a player actually needs to store spades
+            // to handle special actions that bring down the spade cost
+            // for subsequent terraforming
+            // spades: 0
         },
 
         initialize: function (attributes, options) {
@@ -100,9 +103,17 @@ define([
         },
 
         toDbJSON: function () {
-            return _.extend({
-                bonus: this.bonus && this.bonus.toDbJSON() || null
-            }, this.attributes);
+            return _.extend(
+                {
+                    bonus: this.bonus && this.bonus.toDbJSON() || null
+                },
+                _.chain(this.attributes)
+                .map(function (value, key) {
+                    return [key, $.isPlainObject(value) ? JSON.stringify(value) : value];
+                })
+                .object()
+                .value()
+            );
         }
     }, {
         USER_COOKIE: 'username',

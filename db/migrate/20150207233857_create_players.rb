@@ -9,10 +9,12 @@ class CreatePlayers < ActiveRecord::Migration
       t.text :power
       t.integer :workers
       t.integer :priests
+      t.integer :num_keys
       t.text :supply
       t.integer :shipping_value
       t.integer :land_skipping_value
       t.text :income
+      t.string :bonus
 
       t.timestamps
     end
