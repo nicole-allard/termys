@@ -49,6 +49,23 @@ define([
             this.updateProperties();
         },
 
+        finalizePlayers: function () {
+            var turnPositions = _.range(this.players.length).randomize();
+            this.players.each(function (player, index) {
+                player.set({
+                    turnPosition: turnPositions[index]
+                });
+            });
+            this.players.sort();
+
+            this.set({
+                activePlayerId: this.players.first().id,
+                state: 'drafting'
+            });
+
+            this.save();
+        },
+
         /**
          * Called upon initialization and whenever attributes change.
          * Creates or updates all the properties that are synced from
@@ -57,7 +74,7 @@ define([
          */
         updateProperties: function () {
             if (this.get('players'))
-                this.updateCollection('players', Player);
+                this.updateCollection('players', Player, { comparator: 'turnPosition' });
 
             if (this.get('activePlayerId'))
                 this.updateActivePlayer();
@@ -90,15 +107,17 @@ define([
          * Can be passed 2 separate strings, the name of the attr and the name of the
          * property, and the model.
          */
-        updateCollection: function (attrName, propertyName, Model) {
+        updateCollection: function (attrName, propertyName, Model, collectionOptions) {
+            // Handle other method signatures
             if (propertyName.prototype instanceof Backbone.Model) {
+                collectionOptions = Model;
                 Model = propertyName;
                 propertyName = attrName;
             }
 
             var collection = this[propertyName];
             if (!collection)
-                collection = this[propertyName] = new Backbone.Collection();
+                collection = this[propertyName] = new Backbone.Collection([], collectionOptions);
 
             var app = this.app;
             _.each(this.get(attrName), function (attrs) {

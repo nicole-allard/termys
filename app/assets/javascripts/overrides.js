@@ -17,6 +17,18 @@ define([
         return this.replace(/([A-Z])/g, function ($1) { return '_' + $1.toLowerCase(); });
     };
 
+    Array.prototype.randomize = function () {
+        var i, j, tmp;
+        for (i = this.length - 1; i > 0; i--) {
+            j = Math.floor(Math.random() * (i + 1));
+            tmp = this[i];
+            this[i] = this[j];
+            this[j] = tmp;
+        }
+
+        return this;
+    };
+
     var snakeCaseObject = function (obj) {
         if (!$.isPlainObject(obj))
             return obj;

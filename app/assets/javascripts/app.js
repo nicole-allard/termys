@@ -9,6 +9,7 @@ define([
     'views/LoginView',
     'views/JoiningView',
     'views/ConfigurationView',
+    'views/DraftingView',
 
     'overrides'
 ], function (
@@ -21,7 +22,8 @@ define([
 
     LoginView,
     JoiningView,
-    ConfigurationView
+    ConfigurationView,
+    DraftingView
 ) {
     var AppRouter = Marionette.AppRouter.extend({
         routes: {},
@@ -71,7 +73,13 @@ define([
                 this._showView(new ConfigurationView({
                     app: this
                 }));
-                break;
+                return;
+            case 'drafting':
+                // TODO if config is set to random, choose random factions
+                // for the players instead of showing DraftingView
+                this._showView(new DraftingView({
+                    app: this
+                }));
             }
         },
 

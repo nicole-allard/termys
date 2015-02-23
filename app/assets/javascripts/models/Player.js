@@ -25,6 +25,7 @@ define([
         defaults: {
             name: '',
             faction: '',
+            turnPosition: -1,
             victoryPoints: 20,
             coins: 0,
             power: {

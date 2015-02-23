@@ -4,6 +4,7 @@ class CreatePlayers < ActiveRecord::Migration
       t.integer :game_id, index: true, null: false
       t.string :name, index: true, null: false
       t.string :faction
+      t.integer :turn_position
       t.integer :victory_points
       t.integer :coins
       t.text :power

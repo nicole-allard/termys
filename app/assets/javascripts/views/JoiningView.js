@@ -51,16 +51,7 @@ define([
         },
 
         startGame: function () {
-            var game = this.app.game,
-                players = game.players,
-                randomPlayer = players[Math.floor(Math.random() * players.length)];
-
-            game.set({
-                activePlayerId: randomPlayer.id,
-                state: 'drafting'
-            });
-
-            game.save();
+            this.app.game.finalizePlayers();
         }
     });
 

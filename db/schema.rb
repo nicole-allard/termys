@@ -31,17 +31,18 @@ ActiveRecord::Schema.define(version: 20150209045912) do
     t.integer  "game_id",             null: false
     t.string   "name",                null: false
     t.string   "faction"
+    t.integer  "turn_position"
     t.integer  "victory_points"
     t.integer  "coins"
     t.text     "power"
     t.integer  "workers"
     t.integer  "priests"
+    t.integer  "num_keys"
     t.text     "supply"
     t.integer  "shipping_value"
     t.integer  "land_skipping_value"
     t.text     "income"
     t.string   "bonus"
-    t.integer  "num_keys"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

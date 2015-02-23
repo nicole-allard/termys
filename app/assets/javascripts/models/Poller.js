@@ -99,9 +99,15 @@ define([
                 return obj;
 
             _.each(obj, function (value, key) {
-                var camelizedKey = key.toCamelCase();
-                obj[camelizedKey] = Poller.camelizeObject(obj[key]);
+                var camelizedKey = key.toCamelCase(),
+                    camelizedValue;
 
+                if ($.isArray(value))
+                    camelizedValue = _.map(value, Poller.camelizeObject);
+                else
+                    camelizedValue = Poller.camelizeObject(obj[key]);
+
+                obj[camelizedKey] =  camelizedValue;
                 if (key !== camelizedKey)
                     delete obj[key];
             });

@@ -1,0 +1,10 @@
+:each player in players
+    %div= player.name
+    :if player.faction
+        = player.faction
+    :else
+        :if player.isActivePlayer
+            (Choosing)
+
+:if currentPlayer.isActivePlayer
+    Factions:
