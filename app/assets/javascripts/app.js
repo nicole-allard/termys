@@ -80,6 +80,10 @@ define([
                 this._showView(new DraftingView({
                     app: this
                 }));
+                return;
+            case 'dwellings':
+                // TODO implement. for preset config, just initialize the
+                // structures from the prest game
             }
         },
 

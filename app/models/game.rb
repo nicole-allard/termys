@@ -27,7 +27,7 @@ class Game < ActiveRecord::Base
     #                   player_id
     #                   type: dwelling/tradingHouse/temple/stronghold/sanctuary
     #
-    # rounds: json array objects (id, phase)
+    # rounds: json array objects {id: phase}
     #           ids are strings of the form cultName:bonus (ex: water:spade). FE can determine from
     #           ids which round tile it is and what the specific bonuses are.
     #           water:priests, fire:power, air:spades, water:spades, air:workers, fire:workers,

@@ -77,6 +77,12 @@ define([
             // the bonus handler bound to the given player.
             this.stopListening(player, 'pass', this.get('passBonus'));
             this.unset('passBonus');
+        },
+
+        toDbJSON: function () {
+            var json = {};
+            json[this.id] = this.get('coins');
+            return json;
         }
     }, {
         passBonuses: {
@@ -157,8 +163,21 @@ define([
             }
         },
 
-        expand: function (id) {
-            return new Bonus(TILES[id]);
+        /**
+         * Expects an object of the form
+         * { bonus id: num coins }
+         * where bonus id is one of the keys in the
+         * TILES object.
+         */
+        expand: function (bonusCoins, options) {
+            var id = _.keys(bonusCoins)[0],
+                coins = _.values(bonusCoins)[0];
+
+            return new UniqueModel(Bonus, _.extend({
+                app: options.app,
+                coins: coins,
+                id: id
+            }, Bonus.TILES[id]));
         }
     });
 

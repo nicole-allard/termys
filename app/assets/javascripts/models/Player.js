@@ -2,6 +2,7 @@ define([
     'underscore',
     'backbone',
 
+    'presets/FactionShims',
     'models/common/UniqueModel',
     'models/Bonus',
 
@@ -11,6 +12,7 @@ define([
     _,
     Backbone,
 
+    FactionShims,
     UniqueModel,
     Bonus,
 
@@ -53,6 +55,8 @@ define([
                 workers: 0,
                 priests: 0
             }
+            // TODO figure out how to store spade cost, increase track, etc.
+            //
             // TODO figure out if a player actually needs to store spades
             // to handle special actions that bring down the spade cost
             // for subsequent terraforming
@@ -62,8 +66,18 @@ define([
         initialize: function (attributes, options) {
             this.on('change:name', this.updateCookie);
             this.on('change', this.updateProperties);
+            this.on('change:faction', this.initializeFaction);
+            this.on('build:structure', this.updateStructures);
 
             this.app = options.app;
+        },
+
+        initializeFaction: function () {
+            var faction = this.get('faction');
+            if (!faction)
+                return;
+
+            FactionShims[faction].call(this);
         },
 
         isRegistered: function () {
@@ -97,6 +111,26 @@ define([
             });
         },
 
+        updateStructures: function (newStructure) {
+            // TODO
+            // update resources and income based on what
+            // structure was removed from the board, and what
+            // structure (if any) was returned to the board.
+            // add cost for the new structure
+        },
+
+        increaseShipping: function () {
+            // TODO
+            // update shipping value and add appropriate cost
+        },
+
+        nextPlayer: function () {
+            var players = this.app.game.players,
+                index = players.indexOf(this);
+
+            return players.at((index + 1) % players.length);
+        },
+
         toJSON: function () {
             return _.extend({
                 isActivePlayer: this.isActivePlayer()
@@ -118,6 +152,22 @@ define([
         }
     }, {
         USER_COOKIE: 'username',
+        FACTION_COLORS: {
+            'fakirs': 'yellow',
+            'nomads': 'yellow',
+            'chaos': 'red',
+            'giants': 'red',
+            'swarmlings': 'blue',
+            'mermaids': 'blue',
+            'dwarves': 'grey',
+            'engineers': 'grey',
+            'halflings': 'brown',
+            'cultists': 'brown',
+            'alchemists': 'black',
+            'darklings': 'black',
+            'auren': 'green',
+            'witches': 'green'
+        },
 
         initializeFromCookie: function (app) {
             var val = cookies.read(Player.USER_COOKIE);

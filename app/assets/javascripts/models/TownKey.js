@@ -1,9 +1,13 @@
 define([
     'underscore',
-    'backbone'
+    'backbone',
+
+    'models/common/UniqueModel'
 ], function (
     _,
-    Backbone
+    Backbone,
+
+    UniqueModel
 ) {
     var TownKey = Backbone.Model.extend({
         defaults: {
@@ -33,12 +37,15 @@ define([
             }
         },
 
-        expand: function (numVictoryPoints) {
-            return new TownKey(_.extend({
-                victoryPoints: numVictoryPoints
+        expand: function (options) {
+            return new UniqueModel(TownKey, _.extend({
+                victoryPoints: options.numVictoryPoints,
+                app: options.app
             }, TownKey.TILES[numVictoryPoints]));
         }
     });
+
+    UniqueModel.addType('TownKey', TownKey);
 
     return TownKey;
 });

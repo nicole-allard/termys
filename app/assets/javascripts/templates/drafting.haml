@@ -1,10 +1,15 @@
 :each player in players
     %div= player.name
     :if player.faction
-        = player.faction
+        %span= player.faction
     :else
         :if player.isActivePlayer
             (Choosing)
 
+%br
 :if currentPlayer.isActivePlayer
     Factions:
+    :each faction in factions
+        %button{ value: faction }= faction
+
+/ TODO show the chosen rounds and bonuses

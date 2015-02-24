@@ -3,12 +3,14 @@ define([
     'underscore',
     'backbone',
 
+    'models/common/UniqueModel',
     'models/Hex'
 ], function (
     $,
     _,
     Backbone,
 
+    UniqueModel,
     Hex
 ) {
     var addIncome = function (attr, num, player) {
@@ -39,9 +41,8 @@ define([
 
         phaseHandlers: {},
 
-        initialize: function () {
-            var App = require('app');
-            this.app = App.get();
+        initialize: function (options) {
+            this.app = options.app;
 
             this.phaseHandlers[Round.PHASES.INCOME] = this.beginIncome;
             this.phaseHandlers[Round.PHASES.ACTIONS] = this.beginActions;
@@ -77,9 +78,13 @@ define([
             // Mark all players as blocking the income phase from completing
             var game = this.app.game;
             game.blockingPlayers.phase.reset(_.pluck(game.players, 'id'));
-        }
+        },
 
-        // TODO implement toDbJSON
+        toDbJSON: function () {
+            var json = {};
+            json[this.id] = this.get('phase');
+            return json;
+        }
     }, {
         PHASES: {
             PRE: 0, // Round has not yet begun
@@ -93,54 +98,88 @@ define([
         TILES: {
             water: {
                 priests: {
-                    eventName: 'build:structure',
-                    handler: _.partial(structureBonus, 'dwelling', 2)
+                    actionBonus: {
+                        eventName: 'build:structure',
+                        handler: _.partial(structureBonus, 'dwelling', 2)
+                    }
                 },
                 spades: {
-                    eventName: 'build:structure',
-                    handler: _.partial(structureBonus, 'tradingHouse', 3)
+                    actionBonus: {
+                        eventName: 'build:structure',
+                        handler: _.partial(structureBonus, 'tradingHouse', 3)
+                    }
                 }
             },
             fire: {
                 power: {
-                    eventName: 'build:structure',
-                    handler: _.partial(structureBonus, 'dwelling', 2)
+                    actionBonus: {
+                        eventName: 'build:structure',
+                        handler: _.partial(structureBonus, 'dwelling', 2)
+                    }
                 },
                 workers: {
-                    eventName: 'build:structure',
-                    handler: _.partial(structureBonus, 'stronghold,sanctuary', 5)
+                    actionBonus: {
+                        eventName: 'build:structure',
+                        handler: _.partial(structureBonus, 'stronghold,sanctuary', 5)
+                    }
                 }
             },
             air: {
                 spades: {
-                    eventName: 'build:structure',
-                    handler: _.partial(structureBonus, 'tradingHouse', 3)
+                    actionBonus: {
+                        eventName: 'build:structure',
+                        handler: _.partial(structureBonus, 'tradingHouse', 3)
+                    }
                 },
                 workers: {
-                    eventName: 'build:structure',
-                    handler: _.partial(structureBonus, 'stronghold,sanctuary', 5)
+                    actionBonus: {
+                        eventName: 'build:structure',
+                        handler: _.partial(structureBonus, 'stronghold,sanctuary', 5)
+                    }
                 }
             },
             earth: {
                 coins: {
-                    eventName: 'terraform',
-                    handler: function (player, initialTerrain, finalTerrain) {
-                        player.addVictoryPoints(2 * Hex.getTerraformCost(initialTerrain, finalTerrain));
+                    actionBonus: {
+                        eventName: 'terraform',
+                        handler: function (player, initialTerrain, finalTerrain) {
+                            player.addVictoryPoints(2 * Hex.getTerraformCost(initialTerrain, finalTerrain));
+                        }
                     }
                 },
                 spades: {
-                    eventName: 'founded:town',
-                    handler: function (player) {
-                        player.addVictoryPoints(5);
+                    actionBonus: {
+                        eventName: 'founded:town',
+                        handler: function (player) {
+                            player.addVictoryPoints(5);
+                        }
                     }
                 }
             }
         },
 
-        expand: function () {
+        /**
+         * Expects an object of the form
+         * { round id: phase }
+         * where round id is one of the keys in the
+         * TILES object.
+         */
+        expand: function (roundPhase, options) {
+            var id = _.keys(roundPhase)[0],
+                phase = _.values(roundPhase)[0],
+                parts = id.split(':'),
+                cult = parts[0],
+                bonus = parts[1];
 
+            return new UniqueModel(Round, _.extend({
+                app: options.app,
+                phase: phase,
+                id: id
+            }, Round.TILES[cult][bonus]));
         }
     });
+
+    UniqueModel.addType('Round', Round);
 
     return Round;
 });

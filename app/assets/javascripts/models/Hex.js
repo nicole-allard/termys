@@ -228,8 +228,6 @@ define([
                 length = Hex.TERRAINS.length;
             return Math.min((initialIndex - finalIndex).mod(length), (finalIndex - initialIndex).mod(length));
         }
-
-        // TODO implement expand
     });
 
     UniqueModel.addType('Hex', Hex);

@@ -1,19 +1,23 @@
 define([
     'backbone',
 
+    'presets/PresetGames',
     'models/common/UniqueModel',
     'models/Board',
     'models/Player',
     'models/Round',
-    'models/Hex'
+    'models/Hex',
+    'models/Bonus'
 ], function (
     Backbone,
 
+    PresetGames,
     UniqueModel,
     Board,
     Player,
     Round,
-    Hex
+    Hex,
+    Bonus
 ) {
     var Game = Backbone.Model.extend({
         // properties: {
@@ -45,6 +49,8 @@ define([
                 action: new Backbone.Collection()
             };
 
+            // Create default cults, keys, and favor tiles
+
             this.on('change', this.updateProperties);
             this.updateProperties();
         },
@@ -59,6 +65,9 @@ define([
             this.players.sort();
 
             this.set({
+                // TODO if not using a preset config, choose random rounds and bonuses
+                rounds: PresetGames.rounds,
+                bonuses: PresetGames.players[this.players.length].bonuses,
                 activePlayerId: this.players.first().id,
                 state: 'drafting'
             });
@@ -119,15 +128,22 @@ define([
             if (!collection)
                 collection = this[propertyName] = new Backbone.Collection([], collectionOptions);
 
-            var app = this.app;
-            _.each(this.get(attrName), function (attrs) {
+            var app = this.app,
+                value = this.get(attrName);
+
+            if (typeof value === "string")
+                value = JSON.parse(value);
+
+            _.each(value, function (attrs) {
                 // If the model represented by attrs already exists in the collection,
                 // if will also exist in UniqueModel. Calling new UniqueModel will update
                 // the existing model, and calling add will have no effect since Collections
                 // remove duplicates.
                 // If the model doesn't already exist, it will be created and added to the
                 // collection.
-                collection.add(new UniqueModel(Model, attrs, { app: app }));
+                collection.add(Model.expand ?
+                    Model.expand(attrs, { app: app }) :
+                    new UniqueModel(Model, attrs, { app: app }));
             });
 
             this.unset(attrName);
@@ -169,7 +185,8 @@ define([
                 players: this.players.invoke('toDbJSON'),
                 activePlayerId: this.activePlayer.id,
                 rounds: this.rounds ? JSON.stringify(this.rounds.invoke('toDbJSON')) : null,
-                board: JSON.stringify(this.board.toDbJSON())
+                board: JSON.stringify(this.board.toDbJSON()),
+                bonuses: this.bonuses ? JSON.stringify(_.extend.apply(_, this.bonuses.invoke('toDbJSON'))) : null
             }, _.pick(this.attributes, _.keys(this.defaults)));
         },
 
