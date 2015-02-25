@@ -198,9 +198,25 @@ define([
         // TODO implement get structure collection
 
         toDbJSON: function () {
-            // TODO return structure, bridge directions (as an array), and key data.
-            // Don't bother sending terrains or possible bridge directions that don't
-            // have bridges built
+            var json = {};
+
+            if (this.get('key'))
+                json.key = true;
+
+            if (_.any(this.bridgeDirections))
+                json.bridgeDirections = _.chain(this.bridgeDirections)
+                    .map(function (value, key) {
+                        if (value)
+                            return key;
+                    })
+                    .compact()
+                    .value();
+
+            if (this.structure)
+                json.structure = this.structure.toDbJSON();
+
+            if (!_.isEmpty(json))
+                return json;
         }
     }, {
         DIRECTIONS: [

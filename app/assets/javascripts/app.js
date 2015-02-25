@@ -82,8 +82,9 @@ define([
                 }));
                 return;
             case 'dwellings':
-                // TODO implement. for preset config, just initialize the
-                // structures from the prest game
+                // TODO for configs other than preset show a dwellings view
+                this.game.loadPresetDwellings();
+                return;
             }
         },
 

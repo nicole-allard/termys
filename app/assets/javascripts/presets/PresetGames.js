@@ -1,7 +1,9 @@
 define([
-    'underscore'
+    'underscore',
+    'models/Player',
 ], function (
-    _
+    _,
+    Player
 ) {
     var createBoard = function (structures, game) {
         var playersByColor = _.chain(game.players.models)
@@ -52,10 +54,10 @@ define([
             2: {
                 factions: [ 'witches', 'nomads' ],
                 createBoard: _.partial(createBoard, [
-                    '2,6,yellow',
-                    '4,7,green',
+                    '2,6,green',
+                    '4,7,yellow',
                     '5,4,yellow',
-                    '5,5,yellow',
+                    '5,5,green',
                     '8,6,yellow'
                 ]),
                 bonuses: createBonuses([

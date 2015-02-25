@@ -75,6 +75,19 @@ define([
             this.save();
         },
 
+        loadPresetDwellings: function () {
+            if (!this.app.player.isActivePlayer())
+                return;
+
+            PresetGames.players[this.players.length].createBoard(this);
+            this.set({
+                state: 'bonuses',
+                activePlayerId: this.players.first().id
+            });
+
+            this.save();
+        },
+
         /**
          * Called upon initialization and whenever attributes change.
          * Creates or updates all the properties that are synced from
@@ -170,7 +183,7 @@ define([
          */
         updateBoard: function () {
             this.board.set({
-                hexes: this.get('board')
+                hexes: JSON.parse(this.get('board'))
             });
             this.unset('board');
             this.trigger('changeProperty:board');

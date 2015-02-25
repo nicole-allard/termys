@@ -25,7 +25,7 @@ define([
 
         updateProperties: function () {
             if (this.get('playerId')) {
-                this.player = new UniqueModel(Player, this.get('playerId'));
+                this.player = new UniqueModel(Player, { id: this.get('playerId') });
                 this.unset('playerId');
             }
         },
@@ -44,6 +44,8 @@ define([
             'strongholds': 3
         }
     });
+
+    UniqueModel.addType('Structure', Structure);
 
     return Structure;
 });
