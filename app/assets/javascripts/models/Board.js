@@ -42,6 +42,16 @@ define([
             }
         },
 
+        toJSON: function () {
+            return _.extend({
+                hexes: _.map(this.hexes, function (row) {
+                    return _.map(row, function (hex) {
+                        return hex ? hex.toJSON() : null;
+                    });
+                })
+            }, this.attributes);
+        },
+
         toDbJSON: function () {
             return this.hexes.map(function (row) {
                 return row.map(function (hex) {
@@ -55,11 +65,11 @@ define([
         BOARD_TERRAINS: [
             'p,m,f,l,d,w,p,s,w,f,l,w,s',
             'd,r,r,p,s,r,r,d,s,r,r,d',
-            ',r,s,r,m,r,f,r,f,r,m,r,r',
+            'r,r,s,r,m,r,f,r,f,r,m,r,r',
             'f,l,d,r,r,w,l,r,w,r,w,p',
             's,p,w,l,w,p,m,d,r,r,f,s,l',
             'm,f,r,r,d,f,r,r,r,p,m,p',
-            ',r,r,m,r,w,r,f,r,d,s,l,d',
+            'r,r,r,m,r,w,r,f,r,d,s,l,d',
             'd,l,p,r,r,r,l,s,r,m,p,m',
             'w,s,m,l,w,f,d,p,m,r,l,f,w'
         ],

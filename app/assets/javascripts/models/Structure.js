@@ -30,6 +30,12 @@ define([
             }
         },
 
+        toJSON: function () {
+            return _.extend({
+                color: Player.FACTION_COLORS[this.player.get('faction')]
+            }, this.attributes);
+        },
+
         toDbJSON: function () {
             return _.extend({
                 playerId: this.player.id

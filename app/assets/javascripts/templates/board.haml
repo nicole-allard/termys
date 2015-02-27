@@ -1,0 +1,5 @@
+.board
+    :each index, row in hexes
+        %div{ class: 'row' + (index % 2 ? ' row-offset' : '') }
+            :each hex in row
+                %div{ class: 'hex ' + (hex ? hex.terrain : '') }

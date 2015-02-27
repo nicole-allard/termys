@@ -10,6 +10,7 @@ define([
     'views/JoiningView',
     'views/ConfigurationView',
     'views/DraftingView',
+    'views/GameView',
 
     'overrides'
 ], function (
@@ -23,7 +24,8 @@ define([
     LoginView,
     JoiningView,
     ConfigurationView,
-    DraftingView
+    DraftingView,
+    GameView
 ) {
     var AppRouter = Marionette.AppRouter.extend({
         routes: {},
@@ -84,6 +86,13 @@ define([
             case 'dwellings':
                 // TODO for configs other than preset show a dwellings view
                 this.game.loadPresetDwellings();
+                return;
+            case 'bonuses':
+                this._showView(new GameView({
+                    app: this,
+                    model: this.game
+                }));
+                this.game.handleInitialBonuses();
                 return;
             }
         },

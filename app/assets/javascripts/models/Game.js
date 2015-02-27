@@ -88,6 +88,12 @@ define([
             this.save();
         },
 
+        handleInitialBonuses: function () {
+            // TODO go through players in turn order and kick off the
+            // pass action for each (which will return their bonus if
+            // any and prompt them to take a new one from the game)
+        },
+
         /**
          * Called upon initialization and whenever attributes change.
          * Creates or updates all the properties that are synced from

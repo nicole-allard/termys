@@ -183,6 +183,16 @@ define([
         //     return Infinity;
         // },
 
+        getBuiltBridgeDirections: function () {
+            return _.chain(this.bridgeDirections)
+                .map(function (value, key) {
+                    if (value)
+                        return key;
+                })
+                .compact()
+                .value();
+        },
+
         getDirectlyAdjacentHexes: function () {
             var directlyAdjacentHexes = _.chain(Hex.DIRECTIONS)
                 .map(function (direction) {
@@ -197,6 +207,13 @@ define([
 
         // TODO implement get structure collection
 
+        toJSON: function () {
+            return _.extend({
+                structure: this.structure ? this.structure.toJSON() : null,
+                bridgeDirections: this.getBuiltBridgeDirections()
+            }, this.attributes);
+        },
+
         toDbJSON: function () {
             var json = {};
 
@@ -204,13 +221,7 @@ define([
                 json.key = true;
 
             if (_.any(this.bridgeDirections))
-                json.bridgeDirections = _.chain(this.bridgeDirections)
-                    .map(function (value, key) {
-                        if (value)
-                            return key;
-                    })
-                    .compact()
-                    .value();
+                json.bridgeDirections = this.getBuiltBridgeDirections();
 
             if (this.structure)
                 json.structure = this.structure.toDbJSON();

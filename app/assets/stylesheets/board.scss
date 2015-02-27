@@ -1,0 +1,62 @@
+/* TODO move to sass */
+
+.board {
+    background: transparent image-url("board.png") no-repeat scroll 0 0;
+    background-size: 100%;
+    width: 1000px;
+    height: 664px;
+    padding: 1px;
+}
+
+.row:first-child {
+    margin-top: 87px;
+}
+
+.row {
+    margin-left: 169px;
+    margin-bottom: 12px;
+}
+
+.row-offset {
+    margin-left: 198px;
+}
+
+.hex {
+    width: 57.5px;
+    height: 34px;
+    display: inline-block;
+    border: 1px solid black;
+}
+
+.hex.river {
+    background-color: #74CCF7;
+}
+
+.hex.plains {
+    background-color: #8C7343;
+}
+
+.hex.swamp {
+    background-color: #404A38;
+}
+
+.hex.lakes {
+    background-color: #0077CC;
+}
+
+.hex.forest {
+    background-color: #189E3C;
+}
+
+.hex.mountains {
+    background-color: #B8B8B8
+}
+
+.hex.wasteland {
+    background-color: #CF5744;
+}
+
+.hex.desert {
+    background-color: #FFE852;
+}
+
