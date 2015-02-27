@@ -34,11 +34,11 @@ define([
         },
 
         initialize: function () {
-            this.on('change', this.updateProperties);
-            this.updateProperties();
+            this.on('change', this.deserialize);
+            this.deserialize();
         },
 
-        updateProperties: function () {
+        deserialize: function () {
             var structureAttrs = this.get('structure');
             if (structureAttrs) {
                 if (this.structure)
@@ -214,7 +214,7 @@ define([
             }, this.attributes);
         },
 
-        toDbJSON: function () {
+        serialize: function () {
             var json = {};
 
             if (this.get('key'))
@@ -224,7 +224,7 @@ define([
                 json.bridgeDirections = this.getBuiltBridgeDirections();
 
             if (this.structure)
-                json.structure = this.structure.toDbJSON();
+                json.structure = this.structure.serialize();
 
             if (!_.isEmpty(json))
                 return json;

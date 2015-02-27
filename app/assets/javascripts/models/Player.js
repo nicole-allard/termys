@@ -65,7 +65,7 @@ define([
 
         initialize: function (attributes, options) {
             this.on('change:name', this.updateCookie);
-            this.on('change', this.updateProperties);
+            this.on('change', this.deserialize);
             this.on('change:faction', this.initializeFaction);
             this.on('build:structure', this.updateStructures);
 
@@ -92,7 +92,7 @@ define([
             return this.app.game && this === this.app.game.activePlayer;
         },
 
-        updateProperties: function () {
+        deserialize: function () {
             if (this.get('bonus')) {
                 this.bonus = UniqueModel.get(Bonus, this.get('bonus'));
                 this.unset('bonus');
@@ -137,10 +137,10 @@ define([
             }, this.attributes);
         },
 
-        toDbJSON: function () {
+        serialize: function () {
             return _.extend(
                 {
-                    bonus: this.bonus && this.bonus.toDbJSON() || null
+                    bonus: this.bonus && this.bonus.serialize() || null
                 },
                 _.chain(this.attributes)
                 .map(function (value, key) {

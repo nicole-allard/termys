@@ -19,11 +19,11 @@ define([
         },
 
         initialize: function (attrs) {
-            this.on('change', this.updateProperties);
-            this.updateProperties();
+            this.on('change', this.deserialize);
+            this.deserialize();
         },
 
-        updateProperties: function () {
+        deserialize: function () {
             if (this.get('playerId')) {
                 this.player = new UniqueModel(Player, { id: this.get('playerId') });
                 this.unset('playerId');
@@ -36,7 +36,7 @@ define([
             }, this.attributes);
         },
 
-        toDbJSON: function () {
+        serialize: function () {
             return _.extend({
                 playerId: this.player.id
             }, this.attributes);

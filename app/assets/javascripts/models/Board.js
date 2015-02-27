@@ -21,11 +21,11 @@ define([
         initialize: function () {
             this.hexes = Board.createEmptyBoard();
 
-            this.on('change', this.updateProperties);
-            this.updateProperties();
+            this.on('change', this.deserialize);
+            this.deserialize();
         },
 
-        updateProperties: function () {
+        deserialize: function () {
             var hexesData = this.get('hexes');
             if (hexesData) {
                 // Update the attributes of each hex as per the data synced
@@ -52,11 +52,11 @@ define([
             }, this.attributes);
         },
 
-        toDbJSON: function () {
+        serialize: function () {
             return this.hexes.map(function (row) {
                 return row.map(function (hex) {
                     return hex ?
-                        hex.toDbJSON() :
+                        hex.serialize() :
                         null;
                 });
             });

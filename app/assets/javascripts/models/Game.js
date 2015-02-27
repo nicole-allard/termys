@@ -51,8 +51,8 @@ define([
 
             // Create default cults, keys, and favor tiles
 
-            this.on('change', this.updateProperties);
-            this.updateProperties();
+            this.on('change', this.deserialize);
+            this.deserialize();
         },
 
         finalizePlayers: function () {
@@ -100,7 +100,7 @@ define([
          * the backend as attributes but should be stored as properties
          * (basically anything that's a model or collection)
          */
-        updateProperties: function () {
+        deserialize: function () {
             if (this.get('players'))
                 this.updateCollection('players', Player, { comparator: 'turnPosition' });
 
@@ -199,13 +199,13 @@ define([
          * Returns the minimal json representation of the game that can
          * be save to the db and parsed by the frontend models
          */
-        toDbJSON: function () {
+        serialize: function () {
             return _.extend({
-                players: this.players.invoke('toDbJSON'),
+                players: this.players.invoke('serialize'),
                 activePlayerId: this.activePlayer.id,
-                rounds: this.rounds ? JSON.stringify(this.rounds.invoke('toDbJSON')) : null,
-                board: JSON.stringify(this.board.toDbJSON()),
-                bonuses: this.bonuses ? JSON.stringify(_.extend.apply(_, this.bonuses.invoke('toDbJSON'))) : null
+                rounds: this.rounds ? JSON.stringify(this.rounds.invoke('serialize')) : null,
+                board: JSON.stringify(this.board.serialize()),
+                bonuses: this.bonuses ? JSON.stringify(_.extend.apply(_, this.bonuses.invoke('serialize'))) : null
             }, _.pick(this.attributes, _.keys(this.defaults)));
         },
 
@@ -215,7 +215,7 @@ define([
                 type: 'POST',
                 url: '/home/update_game',
                 data: {
-                    game: this.toDbJSON()
+                    game: this.serialize()
                 }
             }).then(function (response) {
                 self.app.poller.parse(response);

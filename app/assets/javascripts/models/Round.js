@@ -80,7 +80,7 @@ define([
             game.blockingPlayers.phase.reset(_.pluck(game.players, 'id'));
         },
 
-        toDbJSON: function () {
+        serialize: function () {
             var json = {};
             json[this.id] = this.get('phase');
             return json;

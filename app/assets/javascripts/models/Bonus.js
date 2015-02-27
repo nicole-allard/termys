@@ -79,7 +79,7 @@ define([
             this.unset('passBonus');
         },
 
-        toDbJSON: function () {
+        serialize: function () {
             var json = {};
             json[this.id] = this.get('coins');
             return json;
