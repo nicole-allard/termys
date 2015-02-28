@@ -67,7 +67,7 @@ define([
             'd,r,r,p,s,r,r,d,s,r,r,d',
             'r,r,s,r,m,r,f,r,f,r,m,r,r',
             'f,l,d,r,r,w,l,r,w,r,w,p',
-            's,p,w,l,w,p,m,d,r,r,f,s,l',
+            's,p,w,l,s,p,m,d,r,r,f,s,l',
             'm,f,r,r,d,f,r,r,r,p,m,p',
             'r,r,r,m,r,w,r,f,r,d,s,l,d',
             'd,l,p,r,r,r,l,s,r,m,p,m',

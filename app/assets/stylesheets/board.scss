@@ -13,22 +13,27 @@
 }
 
 .row {
-    margin-left: 169px;
-    margin-bottom: 12px;
+    margin-left: 17%;
+    margin-bottom: 1.53%;
+    height: 5.5%;
+    .hex {
+        width: 7.18%;
+    }
 }
 
 .row-offset {
-    margin-left: 198px;
+    margin-left: 19.8%;
+    .hex {
+        width: 7.47%;
+    }
 }
 
 .hex {
-    width: 57.5px;
-    height: 34px;
+    height: 100%;
     display: inline-block;
-    border: 1px solid black;
 }
 
-.hex.river {
+/*.hex.river {
     background-color: #74CCF7;
 }
 
@@ -58,5 +63,23 @@
 
 .hex.desert {
     background-color: #FFE852;
+}*/
+
+.structure {
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    background-position: center;
+    background-size: 60%;
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
+@each $structure in dwelling, trading-house, temple, stronghold, sanctuary, bridge {
+    @each $color in green, yellow, black, brown, blue, red, grey {
+        .structure.#{$structure}.#{$color} {
+            background-image: image-url("#{$structure}-#{$color}.png");
+        }
+    }
+}
