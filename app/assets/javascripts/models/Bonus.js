@@ -163,15 +163,9 @@ define([
             }
         },
 
-        /**
-         * Expects an object of the form
-         * { bonus id: num coins }
-         * where bonus id is one of the keys in the
-         * TILES object.
-         */
-        expand: function (bonusCoins, options) {
-            var id = _.keys(bonusCoins)[0],
-                coins = _.values(bonusCoins)[0];
+        expand: function (options) {
+            var id = options.key,
+                coins = options.value;
 
             return new UniqueModel(Bonus, _.extend({
                 app: options.app,

@@ -12,7 +12,8 @@ define([
     'views/DraftingView',
     'views/GameView',
 
-    'overrides'
+    'overrides',
+    'bootstrap'
 ], function (
     $,
     _,

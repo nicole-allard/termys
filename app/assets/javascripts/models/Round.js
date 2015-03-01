@@ -164,9 +164,9 @@ define([
          * where round id is one of the keys in the
          * TILES object.
          */
-        expand: function (roundPhase, options) {
-            var id = _.keys(roundPhase)[0],
-                phase = _.values(roundPhase)[0],
+        expand: function (options) {
+            var id = _.keys(options.value)[0],
+                phase = _.values(options.value)[0],
                 parts = id.split(':'),
                 cult = parts[0],
                 bonus = parts[1];

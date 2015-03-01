@@ -89,9 +89,11 @@ define([
         },
 
         handleInitialBonuses: function () {
-            // TODO go through players in turn order and kick off the
-            // pass action for each (which will return their bonus if
-            // any and prompt them to take a new one from the game)
+            // This will indicate to the view that the player should
+            // choose a bonus. That will cause the bonuses modal to
+            // open and show all the bonuses. The view will handle
+            // disallowing clicking by non-active players.
+            this.app.player.pass();
         },
 
         /**
@@ -153,7 +155,7 @@ define([
             if (typeof value === "string")
                 value = JSON.parse(value);
 
-            _.each(value, function (attrs) {
+            _.each(value, function (value, key) {
                 // If the model represented by attrs already exists in the collection,
                 // if will also exist in UniqueModel. Calling new UniqueModel will update
                 // the existing model, and calling add will have no effect since Collections
@@ -161,8 +163,8 @@ define([
                 // If the model doesn't already exist, it will be created and added to the
                 // collection.
                 collection.add(Model.expand ?
-                    Model.expand(attrs, { app: app }) :
-                    new UniqueModel(Model, attrs, { app: app }));
+                    Model.expand({ app: app, value: value, key: key }) :
+                    new UniqueModel(Model, value, { app: app }));
             });
 
             this.unset(attrName);

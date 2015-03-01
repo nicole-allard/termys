@@ -5,6 +5,7 @@ require.config({
         'underscore': 'vendor/underscore',
         'backbone': 'vendor/backbone',
         'marionette': 'vendor/marionette',
+        'bootstrap': 'vendor/bootstrap.min',
         'haml': 'vendor/haml',
         'text': 'vendor/text'
     },
@@ -22,6 +23,9 @@ require.config({
         'marionette': {
             deps: ['backbone'],
             exports: 'Marionette'
+        },
+        'bootstrap': {
+            deps: ['jquery']
         },
         'haml': {
             exports: 'Haml'

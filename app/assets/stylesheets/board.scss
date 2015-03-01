@@ -6,80 +6,80 @@
     width: 1000px;
     height: 664px;
     padding: 1px;
-}
 
-.row:first-child {
-    margin-top: 87px;
-}
-
-.row {
-    margin-left: 17%;
-    margin-bottom: 1.53%;
-    height: 5.5%;
-    .hex {
-        width: 7.18%;
+    .row:first-child {
+        margin-top: 87px;
     }
-}
 
-.row-offset {
-    margin-left: 19.8%;
-    .hex {
-        width: 7.47%;
+    .row {
+        margin-left: 17%;
+        margin-bottom: 1.53%;
+        height: 5.5%;
+        .hex {
+            width: 7.18%;
+        }
     }
-}
 
-.hex {
-    height: 100%;
-    display: inline-block;
-}
+    .row-offset {
+        margin-left: 19.8%;
+        .hex {
+            width: 7.47%;
+        }
+    }
 
-/*.hex.river {
-    background-color: #74CCF7;
-}
+    .hex {
+        height: 100%;
+        display: inline-block;
+    }
 
-.hex.plains {
-    background-color: #8C7343;
-}
+    /*.hex.river {
+        background-color: #74CCF7;
+    }
 
-.hex.swamp {
-    background-color: #404A38;
-}
+    .hex.plains {
+        background-color: #8C7343;
+    }
 
-.hex.lakes {
-    background-color: #0077CC;
-}
+    .hex.swamp {
+        background-color: #404A38;
+    }
 
-.hex.forest {
-    background-color: #189E3C;
-}
+    .hex.lakes {
+        background-color: #0077CC;
+    }
 
-.hex.mountains {
-    background-color: #B8B8B8
-}
+    .hex.forest {
+        background-color: #189E3C;
+    }
 
-.hex.wasteland {
-    background-color: #CF5744;
-}
+    .hex.mountains {
+        background-color: #B8B8B8
+    }
 
-.hex.desert {
-    background-color: #FFE852;
-}*/
+    .hex.wasteland {
+        background-color: #CF5744;
+    }
 
-.structure {
-    background-color: transparent;
-    background-repeat: no-repeat;
-    background-attachment: scroll;
-    background-position: center;
-    background-size: 60%;
-    display: block;
-    width: 100%;
-    height: 100%;
-}
+    .hex.desert {
+        background-color: #FFE852;
+    }*/
 
-@each $structure in dwelling, trading-house, temple, stronghold, sanctuary, bridge {
-    @each $color in green, yellow, black, brown, blue, red, grey {
-        .structure.#{$structure}.#{$color} {
-            background-image: image-url("#{$structure}-#{$color}.png");
+    .structure {
+        background-color: transparent;
+        background-repeat: no-repeat;
+        background-attachment: scroll;
+        background-position: center;
+        background-size: 60%;
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    @each $structure in dwelling, trading-house, temple, stronghold, sanctuary, bridge {
+        @each $color in green, yellow, black, brown, blue, red, grey {
+            .structure.#{$structure}.#{$color} {
+                background-image: image-url("#{$structure}-#{$color}.png");
+            }
         }
     }
 }
