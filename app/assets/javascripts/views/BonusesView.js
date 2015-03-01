@@ -20,7 +20,8 @@ define([
     var BonusesView = Marionette.CompositeView.extend({
         template: Haml(bonusesTemplate),
         itemView: Marionette.ItemView.extend({
-            template: Haml(bonusTemplate)
+            template: Haml(bonusTemplate),
+            className: 'bonus'
         }),
         itemViewContainer: '.js-game-bonuses'
     });
