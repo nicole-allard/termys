@@ -1,1 +1,1 @@
-%div{ class: 'bonus ' + (id.replace(/,|:/g, '-').toLowerCase()) }
+%div{ class: 'bonus ' + (isSelectable ? 'selectable ' : '') + (id.replace(/,|:/g, '-').toLowerCase()) }

@@ -75,6 +75,12 @@ define([
             this.save();
         },
 
+        activateNextPlayer: function () {
+            this.app.game.set({
+                activePlayerId: this.activePlayer.nextPlayer().id
+            });
+        },
+
         loadPresetDwellings: function () {
             if (!this.app.player.isActivePlayer())
                 return;

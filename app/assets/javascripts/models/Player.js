@@ -92,9 +92,15 @@ define([
             return this.app.game && this === this.app.game.activePlayer;
         },
 
+        isLastPlayer: function () {
+            var players = this.app.game.players;
+            return players.indexOf(this) === players.length - 1;
+        },
+
         deserialize: function () {
             if (this.get('bonus')) {
                 this.bonus = UniqueModel.get(Bonus, this.get('bonus'));
+                this.trigger('changeProperty:bonus');
                 this.unset('bonus');
             }
         },
@@ -137,6 +143,8 @@ define([
             }, this.attributes);
         },
 
+        // TODO determine why income is nil in the DB. Should be
+        // the serialized version of the FE default value.
         serialize: function () {
             return _.extend(
                 {
@@ -172,11 +180,13 @@ define([
         initializeFromCookie: function (app) {
             var val = cookies.read(Player.USER_COOKIE);
             if (val)
-                return new Player({
-                    name: val
-                }, {
-                    app: app
-                });
+                return new UniqueModel(Player,
+                    {
+                        name: val
+                    }, {
+                        app: app
+                    }
+                );
         }
     });
 

@@ -57,9 +57,7 @@ define([
                 });
             }
 
-            this.app.game.set({
-                activePlayerId: currentPlayer.nextPlayer().id
-            });
+            this.app.game.activateNextPlayer();
 
             this.app.game.save();
         },

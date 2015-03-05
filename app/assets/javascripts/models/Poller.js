@@ -65,6 +65,8 @@ define([
                     // player. Update the details, including (hopefully) an id
                     this.app.player.set(playerDetails);
                     UniqueModel.set(Player, this.app.player);
+                } else if (this.app.game && !_.contains(['joining', 'config'], this.app.game.get('state'))) {
+                    throw 'Game does not contain a player named ' + this.app.player.get('name');
                 }
             }
 

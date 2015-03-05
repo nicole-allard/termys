@@ -51,12 +51,35 @@ define([
             // Open a modal, fill it with the bonuses view.
             // listen to a pick event, close the modal
             var bonusesView = new BonusesView({
-                collection: this.model.bonuses
+                collection: this.model.bonuses,
+                app: this.app,
+                allowSelection: true
             });
+
             var modal = new ModalView({
                 id: 'bonuses',
                 contentView: bonusesView
             });
+
+            this.listenTo(bonusesView, 'itemview:select:bonus', function (bonusView) {
+                if (!this.app.player.isActivePlayer())
+                    return;
+
+                var bonus = bonusView.model;
+                bonus.take(this.app.player);
+
+                if (players.every(function (player) {
+                    return !!player.bonus;
+                })) {
+                    this.app.game.set({
+                        state: 'active'
+                    });
+                    modal.closeModal();
+                }
+
+                this.app.game.activateNextPlayer();
+            });
+
 
             modal.openModal();
         }

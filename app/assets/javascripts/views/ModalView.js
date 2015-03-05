@@ -33,6 +33,10 @@ define([
             $('body').append(this.render().$el);
             this.$('.modal').modal();
             this.triggerMethod('show');
+        },
+
+        closeModal: function () {
+            this.$('.modal').modal('hide');
         }
     });
 
