@@ -1,0 +1,20 @@
+.bonus {
+    background-size: 100%;
+    background-attachment: scroll;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    height: 148px;
+    width: 50px;
+    display: inline-block;
+    margin: 0 5px;
+
+    &:first-child {
+        margin-left: 0
+    }
+}
+
+@each $bonus in priests--, workers-power--, coins--, power-shipping-, coins-spade-, coins-cult-, coins--dwelling, workers--tradinghouse, workers--stronghold-sanctuary {
+    .bonus.#{$bonus} {
+        background-image: image-url("bonus-#{$bonus}.png");
+    }
+}
