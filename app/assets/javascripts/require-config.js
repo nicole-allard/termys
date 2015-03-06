@@ -1,5 +1,5 @@
 require.config({
-    baseUrl: 'assets',
+    baseUrl: '/assets',
     paths: {
         'jquery': 'vendor/jquery',
         'underscore': 'vendor/underscore',
@@ -7,7 +7,7 @@ require.config({
         'marionette': 'vendor/marionette',
         'bootstrap': 'vendor/bootstrap.min',
         'haml': 'vendor/haml',
-        'text': 'vendor/text'
+        'text': 'vendor/text',
     },
     shim: {
         'jquery': {
@@ -29,6 +29,9 @@ require.config({
         },
         'haml': {
             exports: 'Haml'
+        },
+        'mocha': {
+            exports: 'mocha'
         }
     }
 });

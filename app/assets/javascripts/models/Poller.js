@@ -23,7 +23,7 @@ define([
         start: function () {
             $.ajax({
                 type: 'GET',
-                url: 'home/get_or_create_game',
+                url: '/home/get_or_create_game',
                 data: {
                     playerName: this.app.player.get('name')
                 }

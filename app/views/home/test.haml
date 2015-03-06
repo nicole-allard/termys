@@ -1,0 +1,14 @@
+= stylesheet_link_tag :mocha
+#mocha
+
+%script
+    /* Set paths for all javascript assets with their cache busting parameters */
+    require.config({ paths: #{@asset_hash.html_safe} });
+
+    /* TODO load tests somehow */
+    require(['mocha', 'jquery'], function (mocha) {
+    mocha.setup('bdd');
+    mocha.checkLeaks();
+    mocha.run();
+    });
+

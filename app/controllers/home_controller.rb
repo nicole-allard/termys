@@ -9,15 +9,10 @@ class HomeController < ApplicationController
         # MD5 hash of the file contents, so that individual files will be
         # busted as they are modified, and unmodified files will remain
         # cached. This mapping is passed to requirejs' path config.
-        asset_hash = Dir.chdir("app/assets/javascripts") do
-             Hash[Dir.glob("**/*.js").map do |filename|
-                file = File.open(filename, 'r')
-                retval = [filename[0..-4], "#{filename}?bust=#{Digest::MD5.hexdigest(file.read)}"]
-                file.close
-                retval
-            end]
-        end
+        @asset_hash = asset_hash.to_json
+    end
 
+    def test
         @asset_hash = asset_hash.to_json
     end
 
@@ -116,6 +111,19 @@ class HomeController < ApplicationController
             :game => game,
             :players => game.players
         }
+    end
+
+    private
+
+    def asset_hash
+        Dir.chdir("app/assets/javascripts") do
+             Hash[Dir.glob("**/*.js").map do |filename|
+                file = File.open(filename, 'r')
+                retval = [filename[0..-4], "#{filename}?bust=#{Digest::MD5.hexdigest(file.read)}"]
+                file.close
+                retval
+            end]
+        end
     end
 
 
