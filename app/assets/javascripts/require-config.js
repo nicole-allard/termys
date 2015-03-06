@@ -1,13 +1,8 @@
 require.config({
     baseUrl: '/assets',
     paths: {
-        'jquery': 'vendor/jquery',
-        'underscore': 'vendor/underscore',
-        'backbone': 'vendor/backbone',
-        'marionette': 'vendor/marionette',
         'bootstrap': 'vendor/bootstrap.min',
-        'haml': 'vendor/haml',
-        'text': 'vendor/text',
+        'haml': 'vendor/haml'
     },
     shim: {
         'jquery': {

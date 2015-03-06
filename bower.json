@@ -2,7 +2,12 @@
     "name": "termys",
     "version": "0.0.1",
     "dependencies": {
-        "jquery": "1.9.1"
+        "jquery": "1.9.1",
+        "backbone": "1.1.2",
+        "marionette": "1.7.4",
+        "underscore": "1.6.0",
+        "requirejs": "2.1.11",
+        "text": "2.0.14"
     },
     "devDependencies": {
         "mocha": "*",
