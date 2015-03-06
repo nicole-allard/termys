@@ -26,7 +26,11 @@ require.config({
             exports: 'Haml'
         },
         'mocha': {
-            exports: 'mocha'
+            deps: ['jquery', 'chai'],
+            init: function() {
+                this.mocha.setup('bdd');
+                return this.mocha;
+            }
         }
     }
 });

@@ -5,9 +5,11 @@
     /* Set paths for all javascript assets with their cache busting parameters */
     require.config({ paths: #{@asset_hash.html_safe} });
 
-    /* TODO load tests somehow */
-    require(['mocha', 'jquery'], function (mocha) {
-    mocha.setup('bdd');
+    /* TODO pass array of all files in the test directory as template variable for import */
+    require(['mocha', 'tests/testGameStages'], function (mocha) {
+
+    expect = require('chai').expect;
+
     mocha.checkLeaks();
     mocha.run();
     });
