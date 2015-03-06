@@ -14,6 +14,7 @@ class HomeController < ApplicationController
 
     def test
         @asset_hash = asset_hash.to_json
+        @test_filenames = test_filenames.to_json
     end
 
     # Returns the current active game, or creates a new game if an active
@@ -114,6 +115,14 @@ class HomeController < ApplicationController
     end
 
     private
+
+    def test_filenames
+        Dir.chdir("app/assets/javascripts/tests") do
+            Dir.glob("**/*.js").map do |filename|
+                "tests/#{filename[0..-4]}"
+            end
+        end
+    end
 
     def asset_hash
         Dir.chdir("app/assets/javascripts") do

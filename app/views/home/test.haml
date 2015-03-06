@@ -5,12 +5,14 @@
     /* Set paths for all javascript assets with their cache busting parameters */
     require.config({ paths: #{@asset_hash.html_safe} });
 
-    /* TODO pass array of all files in the test directory as template variable for import */
-    require(['mocha', 'tests/testGameStages'], function (mocha) {
+    require(['mocha'], function (mocha) {
+    require(#{@test_filenames.html_safe}, function () {
 
     expect = require('chai').expect;
 
     mocha.checkLeaks();
     mocha.run();
+
+    })
     });
 
