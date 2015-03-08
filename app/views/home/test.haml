@@ -1,6 +1,8 @@
 = stylesheet_link_tag :mocha
 #mocha
 
+.game-container{ style: 'display: none;' }
+
 %script
     /* Set paths for all javascript assets with their cache busting parameters */
     require.config({ paths: #{@asset_hash.html_safe} });
@@ -10,7 +12,7 @@
 
     expect = require('chai').expect;
 
-    mocha.checkLeaks();
+    / mocha.checkLeaks();
     mocha.run();
 
     })

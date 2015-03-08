@@ -2,7 +2,8 @@ require.config({
     baseUrl: '/assets',
     paths: {
         'bootstrap': 'vendor/bootstrap.min',
-        'haml': 'vendor/haml'
+        'haml': 'vendor/haml',
+        'sinon': 'sinon/lib/sinon'
     },
     shim: {
         'jquery': {

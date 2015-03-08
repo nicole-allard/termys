@@ -30,6 +30,9 @@ define([
             if (e)
                 e.preventDefault();
 
+            if (!this.app.player.isActivePlayer())
+                return;
+
             var configType = this.$('.js-config-type').val();
 
             // Indicate the completion of the configuration state and save

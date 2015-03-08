@@ -33,7 +33,8 @@ define([
         // },
 
         defaults: {
-            state: ''
+            state: '',
+            config: ''
         },
 
         initialize: function (attrs, options) {

@@ -64,6 +64,13 @@ define([
             return constructor;
         };
 
+        UniqueModel.forget = function (Model) {
+            var pool = UniqueModel.pool(Model);
+            _.each(pool, function (value, key) {
+                delete pool[key];
+            });
+        };
+
         return UniqueModel;
     }
 );

@@ -99,7 +99,8 @@ define([
         },
 
         _showView: function (view) {
-            $('body').html(view.render().$el);
+            this.currentView = view;
+            $('.game-container').html(view.render().$el);
             view.triggerMethod('show');
         }
     });
@@ -109,6 +110,7 @@ define([
         init: function () {
             appRouter = new AppRouter();
             window.TERMYS = { app: appRouter };
+            return appRouter;
         },
 
         get: function () {

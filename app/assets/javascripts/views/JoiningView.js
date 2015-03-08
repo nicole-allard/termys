@@ -35,6 +35,9 @@ define([
         },
 
         joinGame: function () {
+            if (this.app.player.isRegistered())
+                return;
+
             // TODO show spinner, takes awhile for list to update
             var self = this;
             $.ajax({
@@ -51,6 +54,14 @@ define([
         },
 
         startGame: function () {
+            if (!this.app.player.isRegistered())
+                return;
+
+            if (this.app.game.players.length < 2) {
+                alert('Cannot start game with fewer than 2 players');
+                return;
+            }
+
             this.app.game.finalizePlayers();
         }
     });
