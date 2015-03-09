@@ -3,6 +3,7 @@ define([
     'sinon',
     'app',
 
+    'presets/PresetGames',
     'models/common/UniqueModel',
     'models/Player',
 
@@ -12,6 +13,7 @@ define([
     sinon,
     App,
 
+    PresetGames,
     UniqueModel,
     Player,
 
@@ -179,8 +181,8 @@ define([
                     sinon.assert.calledTwice($.ajax);
                     var ajaxArgs = $.ajax.getCalls()[1].args;
                     expect(ajaxArgs.length).to.equal(1);
-                    sinon.assert.match(ajaxArgs[0].url, 'update_game');
-                    expect(ajaxArgs[0].data.game.state).to.equal('joining');
+                    expect(ajaxArgs[0].url).to.match(/update_game/);
+                    expect(ajaxArgs[0].data.game).to.contain({ state: 'joining' });
                     expect(ajaxArgs[0].data.game.config).to.be.ok;
                 });
             });
@@ -197,6 +199,37 @@ define([
                         })
                         .promise()
                     );
+                });
+
+                it('should properly parse the initial player', function () {
+                    app = App.init();
+
+                    expect(app.game.players.length).to.equal(1);
+                    expect(app.game.players.models[0].attributes).to.include({ name: 'Nic', id: 10 });
+                });
+
+                it('should properly parse the joined players', function () {
+                    stubAjax($.Deferred()
+                        .resolve({
+                            game: _.defaults({
+                                state: 'joining',
+                                config: 'preset'
+                            }, baseGame),
+                            players: [
+                                basePlayer,
+                                _.defaults({
+                                    name: 'Ken',
+                                    id: 11
+                                }, basePlayer)
+                            ]
+                        })
+                        .promise()
+                    );
+
+                    app = App.init();
+
+                    expect(app.game.players.length).to.equal(2);
+                    expect(app.game.players.models[1].attributes).to.include({ name: 'Ken', id: 11 });
                 });
 
                 it('should show the joining view', function () {
@@ -227,7 +260,7 @@ define([
                     sinon.assert.calledTwice($.ajax);
                     var ajaxArgs = $.ajax.getCalls()[1].args;
                     expect(ajaxArgs.length).to.equal(1);
-                    sinon.assert.match(ajaxArgs[0].url, 'join_game');
+                    expect(ajaxArgs[0].url).to.match(/join_game/);
                     expect(ajaxArgs[0].data.name).to.equal('Ken');
                 });
 
@@ -257,26 +290,128 @@ define([
                                     state: 'joining',
                                     config: 'preset'
                                 }, baseGame),
-                                players: [ basePlayer ]
-                                // TOD return more than 1 player to test the actual setting up of the game
+                                players: [
+                                    basePlayer,
+                                    _.defaults({
+                                        id: 11,
+                                        name: 'Ken'
+                                    }, basePlayer)
+                                ]
                             })
                             .promise()
                         );
 
+                        // To test for an expected result, use reverse instead of randomize
+                        sandbox.stub(Array.prototype, 'randomize', Array.prototype.reverse);
+
                         app = App.init();
-                        app.game.set({ config: 'preset' });
                         app.currentView.startGame();
                     });
 
-                    // TO test:
-                    //    add turnPosition to each player
-                    //    sort players by turnPostion
-                    //    set activePlayer to the first player in the newly sorted list
-                    //    change state to drafting
-                    //    preset bonuses
-                    //    preset rounds
-                    it('should randomize the players', function () {
+                    it('should save the game', function () {
+                        sinon.assert.calledTwice($.ajax);
 
+                        var ajaxArgs = $.ajax.getCalls()[1].args;
+                        expect(ajaxArgs.length).to.equal(1);
+                        expect(ajaxArgs[0].url).to.match(/update_game/);
+                    });
+
+                    it('should randomize the players', function () {
+                        sinon.assert.calledOnce(Array.prototype.randomize);
+
+                        var ajaxArgs = $.ajax.getCalls()[1].args[0];
+                        expect(ajaxArgs.data.game.players.length).to.equal(2);
+                        expect(ajaxArgs.data.game.players[0]).to.include({ name: 'Ken', id: 11, turnPosition: 0 });
+                        expect(ajaxArgs.data.game.players[1]).to.include({ name: 'Nic', id: 10, turnPosition: 1 });
+                        expect(ajaxArgs.data.game).to.include({ activePlayerId: 11 });
+                    });
+
+                    it('should change the game state', function () {
+                        var ajaxArgs = $.ajax.getCalls()[1].args[0];
+                        expect(ajaxArgs.data.game).to.include({ state: 'drafting' });
+                    });
+
+                    it('should initialize preset bonuses for the number of players', function () {
+                        expect(app.game.bonuses).to.be.ok;
+                        expect(app.game.bonuses.length).to.equal(5);
+                        expect(app.game.bonuses.models[0].attributes).to.contain({
+                            id: 'power:shipping:',
+                            coins: 0
+                        });
+                        expect(app.game.bonuses.models[1].attributes).to.contain({
+                            id: 'coins:spade:',
+                            coins: 0
+                        });
+                        expect(app.game.bonuses.models[2].attributes).to.contain({
+                            id: 'coins::',
+                            coins: 0
+                        });
+                        expect(app.game.bonuses.models[3].attributes).to.contain({
+                            id: 'workers::stronghold,sanctuary',
+                            coins: 0
+                        });
+                        expect(app.game.bonuses.models[4].attributes).to.contain({
+                            id: 'workers,power::',
+                            coins: 0
+                        });
+                    });
+
+                    it('should send bonuses in save request', function () {
+                        var ajaxArgs = $.ajax.getCalls()[1].args[0];
+                        expect(ajaxArgs.data.game.bonuses).to.be.a('string');
+
+                        var bonuses = JSON.parse(ajaxArgs.data.game.bonuses);
+                        expect(bonuses).to.be.a('object');
+                        expect(bonuses).to.contain({
+                            'power:shipping:': 0,
+                            'coins:spade:': 0,
+                            'coins::': 0,
+                            'workers::stronghold,sanctuary': 0,
+                            'workers,power::': 0
+                        });
+                    });
+
+                    it('should initialize the preset rounds for the number of players', function () {
+                         expect(app.game.rounds).to.be.ok;
+                         expect(app.game.rounds.length).to.equal(6);
+                         expect(app.game.rounds.models[0].attributes).to.contain({
+                            id: 'fire:power',
+                            phase: 0
+                         });
+                         expect(app.game.rounds.models[1].attributes).to.contain({
+                            id: 'air:workers',
+                            phase: 0
+                         });
+                         expect(app.game.rounds.models[2].attributes).to.contain({
+                            id: 'earth:coins',
+                            phase: 0
+                         });
+                         expect(app.game.rounds.models[3].attributes).to.contain({
+                            id: 'water:spades',
+                            phase: 0
+                         });
+                         expect(app.game.rounds.models[4].attributes).to.contain({
+                            id: 'fire:workers',
+                            phase: 0
+                         });
+                         expect(app.game.rounds.models[5].attributes).to.contain({
+                            id: 'air:spades',
+                            phase: 0
+                         });
+                    });
+
+                    it('should send rounds in save request', function () {
+                        var ajaxArgs = $.ajax.getCalls()[1].args[0];
+                        expect(ajaxArgs.data.game.rounds).to.be.a('string');
+
+                        var rounds = JSON.parse(ajaxArgs.data.game.rounds);
+                        expect(rounds).to.be.a('array');
+                        expect(rounds[0]).to.eql({ 'fire:power': 0 });
+                        expect(rounds[1]).to.eql({ 'air:workers': 0 });
+                        expect(rounds[2]).to.eql({ 'earth:coins': 0 });
+                        expect(rounds[3]).to.eql({ 'water:spades': 0 });
+                        expect(rounds[4]).to.eql({ 'fire:workers': 0 });
+                        expect(rounds[5]).to.eql({ 'air:spades': 0 });
                     });
                 });
             });
