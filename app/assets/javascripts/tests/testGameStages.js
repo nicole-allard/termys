@@ -92,10 +92,10 @@ define([
             name: 'Ken'
         }, basePlayer),
         orderedNic = _.defaults({
-            turnPosition: 0
+            turn_position: 0
         }, baseNic),
         orderedKen = _.defaults({
-            turnPosition: 1
+            turn_position: 1
         }, baseKen),
         factionedNic = _.defaults({
             faction: 'witches'
@@ -112,6 +112,7 @@ define([
 
         beforeEach(function () {
             sandbox.stub(window, 'alert');
+            sandbox.stub($.prototype, 'modal');
         });
 
         afterEach(function () {
@@ -602,10 +603,26 @@ define([
         });
 
         describe('when the game is in dwellings mode', function () {
+            beforeEach(function () {
+                stubAjax($.Deferred()
+                    .resolve({
+                        game: dwellingsGame,
+                        players: [
+                            factionedNic,
+                            factionedKen
+                        ]
+                    })
+                    .promise()
+                );
+            });
 
 
             it('should initialize tha players from the fetch', function () {
+                app = App.init();
 
+                expect(app.game.players.length).to.equal(2);
+                expect(app.game.players.models[0].attributes).to.contain({ id: 10, name: 'Nic', turnPosition: 0, faction: 'witches' });
+                expect(app.game.players.models[1].attributes).to.contain({ id: 11, name: 'Ken', turnPosition: 1, faction: 'nomads' });
             });
 
             it('should initialize preset dwellings', function () {
