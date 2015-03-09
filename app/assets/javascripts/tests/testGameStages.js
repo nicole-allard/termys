@@ -6,6 +6,8 @@ define([
     'presets/PresetGames',
     'models/common/UniqueModel',
     'models/Player',
+    'models/Bonus',
+    'models/Round',
 
     'utils/cookies'
 ], function (
@@ -16,6 +18,8 @@ define([
     PresetGames,
     UniqueModel,
     Player,
+    Bonus,
+    Round,
 
     cookies
 ) {
@@ -86,6 +90,8 @@ define([
             }
 
             UniqueModel.forget(Player);
+            UniqueModel.forget(Bonus);
+            UniqueModel.forget(Round);
 
             sandbox.restore();
         });
@@ -414,6 +420,150 @@ define([
                         expect(rounds[5]).to.eql({ 'air:spades': 0 });
                     });
                 });
+            });
+
+            describe('when the game is in drafting mode', function () {
+                beforeEach(function () {
+                    stubAjax($.Deferred()
+                        .resolve({
+                            game: _.defaults({
+                                state: 'drafting',
+                                config: 'preset',
+                                activePlayerId: 10,
+                                bonuses: '{"power:shipping:":0,"coins:spade:":0,"coins::":0,"workers::stronghold,sanctuary":0,"workers,power::":0}',
+                                rounds: '[{"fire:power":0},{"air:workers":0},{"earth:coins":0},{"water:spades":0},{"fire:workers":0},{"air:spades":0}]'
+                            }, baseGame),
+                            players: [
+                                _.defaults({
+                                    turnPosition: 0
+                                }, basePlayer),
+
+                                _.defaults({
+                                    name: 'Ken',
+                                    id: 11,
+                                    turnPosition: 1
+                                }, basePlayer)
+                            ]
+                        })
+                        .promise()
+                    );
+                });
+
+                it('should show the drafting view', function () {
+                    app = App.init();
+
+                    expect(app.currentView.chooseFaction).to.be.ok;
+                });
+
+                it('should make a fetch call', function () {
+                    app = App.init();
+
+                    sinon.assert.calledOnce($.ajax);
+                    expect($.ajax.getCalls()[0].args[0].url).to.match(/get_or_create_game/);
+                });
+
+                it('should initialize the game from the fetch', function () {
+                    app = App.init();
+
+                    expect(app.game.attributes).to.contain({ state: 'drafting', config: 'preset' });
+                    expect(app.game.activePlayer).to.be.ok;
+                    expect(app.game.activePlayer.attributes).to.contain({ name: 'Nic', id: 10 });
+                });
+
+                // TODO fix: initializing from fetch doesn't act the same as initializing from presets
+                it('should initialize the bonuses from the fetch', function () {
+                    app = App.init();
+
+                    expect(app.game.bonuses).to.be.ok;
+                    expect(app.game.bonuses.length).to.equal(5);
+                    expect(app.game.bonuses.models[0].attributes).to.contain({
+                        id: 'power:shipping:',
+                        coins: 0
+                    });
+                    expect(app.game.bonuses.models[1].attributes).to.contain({
+                        id: 'coins:spade:',
+                        coins: 0
+                    });
+                    expect(app.game.bonuses.models[2].attributes).to.contain({
+                        id: 'coins::',
+                        coins: 0
+                    });
+                    expect(app.game.bonuses.models[3].attributes).to.contain({
+                        id: 'workers::stronghold,sanctuary',
+                        coins: 0
+                    });
+                    expect(app.game.bonuses.models[4].attributes).to.contain({
+                        id: 'workers,power::',
+                        coins: 0
+                    });
+                });
+
+                it('should initialize the rounds from the fetch', function () {
+                    app = App.init();
+
+                    expect(app.game.rounds).to.be.ok;
+                    expect(app.game.rounds.length).to.equal(6);
+                    expect(app.game.rounds.models[0].attributes).to.contain({
+                       id: 'fire:power',
+                       phase: 0
+                    });
+                    expect(app.game.rounds.models[1].attributes).to.contain({
+                       id: 'air:workers',
+                       phase: 0
+                    });
+                    expect(app.game.rounds.models[2].attributes).to.contain({
+                       id: 'earth:coins',
+                       phase: 0
+                    });
+                    expect(app.game.rounds.models[3].attributes).to.contain({
+                       id: 'water:spades',
+                       phase: 0
+                    });
+                    expect(app.game.rounds.models[4].attributes).to.contain({
+                       id: 'fire:workers',
+                       phase: 0
+                    });
+                    expect(app.game.rounds.models[5].attributes).to.contain({
+                       id: 'air:spades',
+                       phase: 0
+                    });
+                });
+
+                it('should not allow a non-active player to choose a faction', function () {
+                    setCurrentPlayer('Ken');
+
+                    app = App.init();
+
+                    app.currentView.chooseFaction({ currentTarget: $('button').val('witches') });
+
+                    // Should not have updated the non-active player
+                    expect(app.player.attributes).to.contain({ id: 11, name: 'Ken', faction: null });
+
+                    // Should not have tried to save player changes
+                    sinon.assert.calledOnce($.ajax);
+                });
+
+                it('should save the active player once they\'ve chosen a faction', function () {
+
+                });
+            });
+        });
+
+        describe('when the game is in dwellings mode', function () {
+            it('should initialize preset dwellings', function () {
+
+            });
+
+            it('should save the game', function () {
+
+            });
+
+            it('should send dwellings with the save request', function () {
+
+            });
+
+            it('should update the game state to bonuses', function (done) {
+
             });
         });
     });

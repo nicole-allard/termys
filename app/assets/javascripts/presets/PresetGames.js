@@ -30,11 +30,12 @@ define([
         // Create the db state of bonuses, an object from
         // id to number of coins on the bonus. Since this
         // is an initial state, bonuses have 0 coins on each.
-        return _.map(bonuses, function (id) {
-            var object = {};
-            object[id] = 0;
-            return object;
-        });
+        return _.chain(bonuses)
+            .map(function (id) {
+                return [id, 0];
+            })
+            .object()
+            .value();
     };
 
     return {

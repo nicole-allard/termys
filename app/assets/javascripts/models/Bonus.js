@@ -165,9 +165,8 @@ define([
         },
 
         expand: function (options) {
-            var obj = options.value,
-                id = _.keys(obj)[0],
-                coins = _.values(obj)[0];
+            var id = options.key,
+                coins = options.value;
 
             return new UniqueModel(Bonus, _.extend({
                 app: options.app,
