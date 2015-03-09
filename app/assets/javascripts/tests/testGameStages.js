@@ -53,10 +53,22 @@ define([
             favors: null,
             bonuses: null,
         },
+        joiningGame = _.defaults({
+            state: 'joining',
+            config: 'preset'
+        }),
+        draftingGame = _.defaults({
+            state: 'drafting',
+            activePlayerId: 10,
+            bonuses: '{"power:shipping:":0,"coins:spade:":0,"coins::":0,"workers::stronghold,sanctuary":0,"workers,power::":0}',
+            rounds: '[{"fire:power":0},{"air:workers":0},{"earth:coins":0},{"water:spades":0},{"fire:workers":0},{"air:spades":0}]'
+        }, joiningGame),
+        dwellingsGame = _.defaults({
+            state: 'dwellings'
+        }, draftingGame),
+
         basePlayer = {
             game_id: 1,
-            id: 10,
-            name: 'Nic',
             faction: null,
             turn_position: null,
             victory_points: null,
@@ -71,6 +83,27 @@ define([
             income: null,
             bonus: null
         },
+        baseNic = _.defaults({
+            id: 10,
+            name: 'Nic'
+        }, basePlayer),
+        baseKen = _.defaults({
+            id: 11,
+            name: 'Ken'
+        }, basePlayer),
+        orderedNic = _.defaults({
+            turnPosition: 0
+        }, baseNic),
+        orderedKen = _.defaults({
+            turnPosition: 1
+        }, baseKen),
+        factionedNic = _.defaults({
+            faction: 'witches'
+        }, orderedNic),
+        factionedKen = _.defaults({
+            faction: 'nomads'
+        }, orderedKen),
+
         sandbox, app;
 
         before(function () {
@@ -137,7 +170,7 @@ define([
                     stubAjax($.Deferred()
                         .resolve({
                             game: baseGame,
-                            players: [ basePlayer ]
+                            players: [ baseNic ]
                         })
                         .promise()
                     );
@@ -151,7 +184,7 @@ define([
                     expect(app.game).is.ok;
                     expect(app.game.attributes.state).to.equal('config');
                     expect(app.game.players.length).to.equal(1);
-                    expect(app.game.players.models[0].id).to.equal(basePlayer.id);
+                    expect(app.game.players.models[0].id).to.equal(10);
                     expect(app.game.activePlayer).to.equal(app.game.players.models[0]);
                 });
 
@@ -197,11 +230,8 @@ define([
                 beforeEach(function () {
                     stubAjax($.Deferred()
                         .resolve({
-                            game: _.defaults({
-                                state: 'joining',
-                                config: 'preset'
-                            }, baseGame),
-                            players: [ basePlayer ]
+                            game: joiningGame,
+                            players: [ baseNic ]
                         })
                         .promise()
                     );
@@ -217,16 +247,10 @@ define([
                 it('should properly parse the joined players', function () {
                     stubAjax($.Deferred()
                         .resolve({
-                            game: _.defaults({
-                                state: 'joining',
-                                config: 'preset'
-                            }, baseGame),
+                            game: joiningGame,
                             players: [
-                                basePlayer,
-                                _.defaults({
-                                    name: 'Ken',
-                                    id: 11
-                                }, basePlayer)
+                                baseNic,
+                                baseKen
                             ]
                         })
                         .promise()
@@ -292,16 +316,10 @@ define([
                     beforeEach(function () {
                         stubAjax($.Deferred()
                             .resolve({
-                                game: _.defaults({
-                                    state: 'joining',
-                                    config: 'preset'
-                                }, baseGame),
+                                game: joiningGame,
                                 players: [
-                                    basePlayer,
-                                    _.defaults({
-                                        id: 11,
-                                        name: 'Ken'
-                                    }, basePlayer)
+                                    baseNic,
+                                    baseKen
                                 ]
                             })
                             .promise()
@@ -426,23 +444,10 @@ define([
                 beforeEach(function () {
                     stubAjax($.Deferred()
                         .resolve({
-                            game: _.defaults({
-                                state: 'drafting',
-                                config: 'preset',
-                                activePlayerId: 10,
-                                bonuses: '{"power:shipping:":0,"coins:spade:":0,"coins::":0,"workers::stronghold,sanctuary":0,"workers,power::":0}',
-                                rounds: '[{"fire:power":0},{"air:workers":0},{"earth:coins":0},{"water:spades":0},{"fire:workers":0},{"air:spades":0}]'
-                            }, baseGame),
+                            game: draftingGame,
                             players: [
-                                _.defaults({
-                                    turnPosition: 0
-                                }, basePlayer),
-
-                                _.defaults({
-                                    name: 'Ken',
-                                    id: 11,
-                                    turnPosition: 1
-                                }, basePlayer)
+                                orderedNic,
+                                orderedKen
                             ]
                         })
                         .promise()
@@ -597,6 +602,8 @@ define([
         });
 
         describe('when the game is in dwellings mode', function () {
+
+
             it('should initialize tha players from the fetch', function () {
 
             });
