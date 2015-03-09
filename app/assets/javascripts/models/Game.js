@@ -174,7 +174,7 @@ define([
                     new UniqueModel(Model, value, { app: app }));
             });
 
-            this.unset(attrName);
+            this.unset(attrName, { silent: true });
             this.trigger('changeProperty:' + propertyName);
         },
 
@@ -189,7 +189,7 @@ define([
                 this.trigger('changeProperty:activePlayer');
             }
 
-            this.unset('activePlayerId');
+            this.unset('activePlayerId', { silent: true });
         },
 
         /**
@@ -200,7 +200,7 @@ define([
             this.board.set({
                 hexes: JSON.parse(this.get('board'))
             });
-            this.unset('board');
+            this.unset('board', { silent: true });
             this.trigger('changeProperty:board');
         },
 

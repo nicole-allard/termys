@@ -47,6 +47,8 @@ define([
                 faction: chosenFaction
             });
 
+            this.app.game.activateNextPlayer();
+
             // Once every player has chosen a faction, move onto the
             // dwelling state.
             if (players.every(function (player) {
@@ -56,8 +58,6 @@ define([
                     state: 'dwellings'
                 });
             }
-
-            this.app.game.activateNextPlayer();
 
             this.app.game.save();
         },

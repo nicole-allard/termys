@@ -470,7 +470,6 @@ define([
                     expect(app.game.activePlayer.attributes).to.contain({ name: 'Nic', id: 10 });
                 });
 
-                // TODO fix: initializing from fetch doesn't act the same as initializing from presets
                 it('should initialize the bonuses from the fetch', function () {
                     app = App.init();
 
@@ -534,7 +533,7 @@ define([
 
                     app = App.init();
 
-                    app.currentView.chooseFaction({ currentTarget: $('button').val('witches') });
+                    app.currentView.chooseFaction({ currentTarget: $('<button>').val('witches') });
 
                     // Should not have updated the non-active player
                     expect(app.player.attributes).to.contain({ id: 11, name: 'Ken', faction: null });
@@ -543,13 +542,65 @@ define([
                     sinon.assert.calledOnce($.ajax);
                 });
 
-                it('should save the active player once they\'ve chosen a faction', function () {
+                it('should call save once the active player has chosen a faction', function () {
+                    app = App.init();
 
+                    app.currentView.chooseFaction({ currentTarget: $('<button>').val('witches') });
+
+                    // Should save the changes
+                    sinon.assert.calledTwice($.ajax);
+
+                    var ajaxArgs = $.ajax.getCalls()[1].args[0];
+                    expect(ajaxArgs.url).to.match(/update_game/);
+                    expect(ajaxArgs.data.game).to.contain({ activePlayerId: 11, state: 'drafting' });
+                    expect(ajaxArgs.data.game.players[0]).to.contain({ id: 10, name: 'Nic', faction: 'witches' });
+                });
+
+                it('should update the game and players once the active player has chosen a faction', function () {
+                    app = App.init();
+
+                    // Stub game save, otherwise the response will be parsed and overwrite the values set
+                    // before the save
+                    sandbox.stub(app.game, 'save');
+
+                    app.currentView.chooseFaction({ currentTarget: $('<button>').val('witches') });
+
+                    // Should update the active player's faction
+                    expect(app.player.attributes).to.contain({ id: 10, name: 'Nic', faction: 'witches' });
+
+                    // Should update the active player, but stay in the drafting state
+                    expect(app.game.activePlayer.attributes).to.contain({ id: 11, name: 'Ken', faction: null });
+                });
+
+                it('should switch the game state once the lat player has chosen a faction', function () {
+                    setCurrentPlayer('Ken');
+
+                    app = App.init();
+
+                    // Stub game save, otherwise the response will be parsed and overwrite the values set
+                    // before the save
+                    sandbox.stub(app.game, 'save');
+
+                    app.game.players.models[0].set({ faction: 'witches' });
+                    app.game.set({ activePlayerId: 11 });
+
+                    app.currentView.chooseFaction({ currentTarget: $('<button>').val('nomads') });
+
+                    // Should update the active player's faction
+                    expect(app.player.attributes).to.contain({ id: 11, name: 'Ken', faction: 'nomads' });
+
+                    // Should update the active player and the game state
+                    expect(app.game.activePlayer.attributes).to.contain({ id: 10, name: 'Nic' });
+                    expect(app.game.attributes).to.contain({ state: 'dwellings' });
                 });
             });
         });
 
         describe('when the game is in dwellings mode', function () {
+            it('should initialize tha players from the fetch', function () {
+
+            });
+
             it('should initialize preset dwellings', function () {
 
             });
