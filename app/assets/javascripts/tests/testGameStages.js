@@ -5,6 +5,7 @@ define([
 
     'presets/PresetGames',
     'models/common/UniqueModel',
+    'models/Game',
     'models/Player',
     'models/Bonus',
     'models/Round',
@@ -17,6 +18,7 @@ define([
 
     PresetGames,
     UniqueModel,
+    Game,
     Player,
     Bonus,
     Round,
@@ -154,7 +156,7 @@ define([
                 app.player.set({ name: 'Nic' });
 
                 sinon.assert.calledOnce($.ajax);
-                var ajaxArgs = $.ajax.getCalls()[0].args;
+                var ajaxArgs = $.ajax.firstCall.args;
                 expect(ajaxArgs.length).to.equal(1);
                 sinon.assert.match(ajaxArgs[0].url, 'get_or_create_game');
                 expect(ajaxArgs[0].data.playerName).to.equal('Nic');
@@ -219,7 +221,7 @@ define([
                     // Should have called update_game with updated game attrs:
                     // joining state and new game config
                     sinon.assert.calledTwice($.ajax);
-                    var ajaxArgs = $.ajax.getCalls()[1].args;
+                    var ajaxArgs = $.ajax.secondCall.args;
                     expect(ajaxArgs.length).to.equal(1);
                     expect(ajaxArgs[0].url).to.match(/update_game/);
                     expect(ajaxArgs[0].data.game).to.contain({ state: 'joining' });
@@ -289,7 +291,7 @@ define([
                     app.currentView.joinGame();
 
                     sinon.assert.calledTwice($.ajax);
-                    var ajaxArgs = $.ajax.getCalls()[1].args;
+                    var ajaxArgs = $.ajax.secondCall.args;
                     expect(ajaxArgs.length).to.equal(1);
                     expect(ajaxArgs[0].url).to.match(/join_game/);
                     expect(ajaxArgs[0].data.name).to.equal('Ken');
@@ -336,7 +338,7 @@ define([
                     it('should save the game', function () {
                         sinon.assert.calledTwice($.ajax);
 
-                        var ajaxArgs = $.ajax.getCalls()[1].args;
+                        var ajaxArgs = $.ajax.secondCall.args;
                         expect(ajaxArgs.length).to.equal(1);
                         expect(ajaxArgs[0].url).to.match(/update_game/);
                     });
@@ -344,7 +346,7 @@ define([
                     it('should randomize the players', function () {
                         sinon.assert.calledOnce(Array.prototype.randomize);
 
-                        var ajaxArgs = $.ajax.getCalls()[1].args[0];
+                        var ajaxArgs = $.ajax.secondCall.args[0];
                         expect(ajaxArgs.data.game.players.length).to.equal(2);
                         expect(ajaxArgs.data.game.players[0]).to.include({ name: 'Ken', id: 11, turnPosition: 0 });
                         expect(ajaxArgs.data.game.players[1]).to.include({ name: 'Nic', id: 10, turnPosition: 1 });
@@ -352,7 +354,7 @@ define([
                     });
 
                     it('should change the game state', function () {
-                        var ajaxArgs = $.ajax.getCalls()[1].args[0];
+                        var ajaxArgs = $.ajax.secondCall.args[0];
                         expect(ajaxArgs.data.game).to.include({ state: 'drafting' });
                     });
 
@@ -382,7 +384,7 @@ define([
                     });
 
                     it('should send bonuses in save request', function () {
-                        var ajaxArgs = $.ajax.getCalls()[1].args[0];
+                        var ajaxArgs = $.ajax.secondCall.args[0];
                         expect(ajaxArgs.data.game.bonuses).to.be.a('string');
 
                         var bonuses = JSON.parse(ajaxArgs.data.game.bonuses);
@@ -426,7 +428,7 @@ define([
                     });
 
                     it('should send rounds in save request', function () {
-                        var ajaxArgs = $.ajax.getCalls()[1].args[0];
+                        var ajaxArgs = $.ajax.secondCall.args[0];
                         expect(ajaxArgs.data.game.rounds).to.be.a('string');
 
                         var rounds = JSON.parse(ajaxArgs.data.game.rounds);
@@ -465,7 +467,7 @@ define([
                     app = App.init();
 
                     sinon.assert.calledOnce($.ajax);
-                    expect($.ajax.getCalls()[0].args[0].url).to.match(/get_or_create_game/);
+                    expect($.ajax.firstCall.args[0].url).to.match(/get_or_create_game/);
                 });
 
                 it('should initialize the game from the fetch', function () {
@@ -556,7 +558,7 @@ define([
                     // Should save the changes
                     sinon.assert.calledTwice($.ajax);
 
-                    var ajaxArgs = $.ajax.getCalls()[1].args[0];
+                    var ajaxArgs = $.ajax.secondCall.args[0];
                     expect(ajaxArgs.url).to.match(/update_game/);
                     expect(ajaxArgs.data.game).to.contain({ activePlayerId: 11, state: 'drafting' });
                     expect(ajaxArgs.data.game.players[0]).to.contain({ id: 10, name: 'Nic', faction: 'witches' });
@@ -618,27 +620,59 @@ define([
 
 
             it('should initialize tha players from the fetch', function () {
+                // Don't let the game save, not releveant for this particular test
+                sandbox.stub(Game.prototype, 'save');
+
                 app = App.init();
+
+                sinon.assert.calledOnce($.ajax);
+                expect($.ajax.firstCall.args[0].url).to.match(/get_or_create_game/);
 
                 expect(app.game.players.length).to.equal(2);
                 expect(app.game.players.models[0].attributes).to.contain({ id: 10, name: 'Nic', turnPosition: 0, faction: 'witches' });
                 expect(app.game.players.models[1].attributes).to.contain({ id: 11, name: 'Ken', turnPosition: 1, faction: 'nomads' });
             });
 
-            it('should initialize preset dwellings', function () {
+            describe('with a preset config', function () {
+                it('should initialize preset dwellings', function () {
+                    app = App.init();
 
+                    expect(app.game.board).to.be.ok;
+
+                    // 9 rows, even numbered rows have 13 hexes, odd numbered rows have 12
+                    expect(app.game.board.hexes.length).to.equal(9);
+                    expect(app.game.board.hexes[0].length).to.equal(13);
+                    expect(app.game.board.hexes[1].length).to.equal(12);
+
+                    expect(app.game.board.hexes[2][6].structure).to.be.ok;
+                    expect(app.game.board.hexes[2][6].structure.attributes).to.contain({ type: 'dwelling' });
+                    expect(app.game.board.hexes[2][6].structure.player.attributes).to.contain({ id: 10, name: 'Nic', faction: 'witches' });
+
+                    expect(app.game.board.hexes[4][7].structure).to.be.ok;
+                    expect(app.game.board.hexes[4][7].structure.attributes).to.contain({ type: 'dwelling' });
+                    expect(app.game.board.hexes[4][7].structure.player.attributes).to.contain({ id: 11, name: 'Ken', faction: 'nomads' });
+                });
+
+                it('should update the game state to bonuses', function () {
+                    app = App.init();
+
+                    expect(app.game.attributes).to.contain({ state: 'bonuses' });
+                });
+
+                it('should save the game and the dwellings', function () {
+                    app = App.init();
+
+                    sinon.assert.calledTwice($.ajax);
+                    var ajaxArgs = $.ajax.secondCall.args[0];
+                    expect(ajaxArgs.url).to.match(/update_game/);
+                    expect(ajaxArgs.data.game).to.contain({ board: '[[null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,{"structure":{"playerId":10,"type":"dwelling"}},null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},null,null,null,null,null],[null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},{"structure":{"playerId":10,"type":"dwelling"}},null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},null,null,null,null,null,null]]' });
+                });
             });
+        });
 
-            it('should save the game', function () {
-
-            });
-
-            it('should send dwellings with the save request', function () {
-
-            });
-
-            it('should update the game state to bonuses', function (done) {
-
+        describe('when the game is in bonuses mode', function () {
+            it('should initialize the game board from the fetch', function () {
+                // TODO
             });
         });
     });
