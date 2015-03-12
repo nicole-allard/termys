@@ -44,7 +44,7 @@ define([
                 type: 'POST',
                 url: '/home/join_game',
                 data: {
-                    name: this.app.player.get('name')
+                    player: this.app.player.serialize()
                 }
             }).then(function (response) {
                 self.app.poller.parse(response);

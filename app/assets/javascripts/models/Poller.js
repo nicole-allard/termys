@@ -25,7 +25,7 @@ define([
                 type: 'GET',
                 url: '/home/get_or_create_game',
                 data: {
-                    playerName: this.app.player.get('name')
+                    player: this.app.player.serialize()
                 }
             }).then(_.bind(function (response) {
                 this.parse(response);

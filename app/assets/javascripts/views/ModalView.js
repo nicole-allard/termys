@@ -20,9 +20,15 @@ define([
         initialize: function (options) {
             this.id = options.id;
             this.contentView = options.contentView;
+            this.app = options.app;
+        },
+
+        onClose: function () {
+            this.app.modalView = null;
         },
 
         onShow: function () {
+            this.app.modalView = this;
             this.contentRegion.show(this.contentView);
         },
 

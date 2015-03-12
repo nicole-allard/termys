@@ -10,6 +10,8 @@ define([
     'models/Bonus',
     'models/Round',
 
+    'views/BonusesView',
+
     'utils/cookies'
 ], function (
     $,
@@ -22,6 +24,8 @@ define([
     Player,
     Bonus,
     Round,
+
+    BonusesView,
 
     cookies
 ) {
@@ -68,6 +72,10 @@ define([
         dwellingsGame = _.defaults({
             state: 'dwellings'
         }, draftingGame),
+        bonusesGame = _.defaults({
+            board: '[[null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,{"structure":{"playerId":10,"type":"dwelling"}},null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},null,null,null,null,null],[null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},{"structure":{"playerId":10,"type":"dwelling"}},null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},null,null,null,null,null,null]]',
+            state: 'bonuses'
+        }, draftingGame),
 
         basePlayer = {
             game_id: 1,
@@ -93,12 +101,46 @@ define([
             id: 11,
             name: 'Ken'
         }, basePlayer),
+        joinedNic = {
+            id: 10,
+            name: 'Nic',
+            bonus: null,
+            coins: 0,
+            faction: '',
+            income: '{"power":0,"coins":0,"workers":0,"priests":0}',
+            landSkippingValue: 0,
+            numKeys: 0,
+            power: '{"1":0,"2":0,"3":0}',
+            priests: 0,
+            shippingValue: 0,
+            supply: '{"priests":7,"dwellings":10,"tradingHouses":4,"temples":3,"strongholds":1,"sanctuaries":1,"bridges":3}',
+            turnPosition: -1,
+            victoryPoints: 20,
+            workers: 0
+        },
+        joinedKen = {
+            id: 11,
+            name: 'Ken',
+            bonus: null,
+            coins: 0,
+            faction: '',
+            income: '{"power":0,"coins":0,"workers":0,"priests":0}',
+            landSkippingValue: 0,
+            numKeys: 0,
+            power: '{"1":0,"2":0,"3":0}',
+            priests: 0,
+            shippingValue: 0,
+            supply: '{"priests":7,"dwellings":10,"tradingHouses":4,"temples":3,"strongholds":1,"sanctuaries":1,"bridges":3}',
+            turnPosition: -1,
+            victoryPoints: 20,
+            workers: 0
+        },
         orderedNic = _.defaults({
             turn_position: 0
-        }, baseNic),
+        }, joinedNic),
         orderedKen = _.defaults({
             turn_position: 1
-        }, baseKen),
+        }, joinedKen),
         factionedNic = _.defaults({
             faction: 'witches'
         }, orderedNic),
@@ -159,7 +201,7 @@ define([
                 var ajaxArgs = $.ajax.firstCall.args;
                 expect(ajaxArgs.length).to.equal(1);
                 sinon.assert.match(ajaxArgs[0].url, 'get_or_create_game');
-                expect(ajaxArgs[0].data.playerName).to.equal('Nic');
+                expect(ajaxArgs[0].data.player).to.eql(_.omit(joinedNic, 'id'));
             });
         });
 
@@ -173,7 +215,7 @@ define([
                     stubAjax($.Deferred()
                         .resolve({
                             game: baseGame,
-                            players: [ baseNic ]
+                            players: [ joinedNic ]
                         })
                         .promise()
                     );
@@ -187,7 +229,8 @@ define([
                     expect(app.game).is.ok;
                     expect(app.game.attributes.state).to.equal('config');
                     expect(app.game.players.length).to.equal(1);
-                    expect(app.game.players.models[0].id).to.equal(10);
+                    expect(app.game.players.models[0].attributes).to.include({ name: 'Nic', id: 10, victoryPoints: 20 });
+                    expect(app.game.players.models[0].attributes.income).to.be.ok;
                     expect(app.game.activePlayer).to.equal(app.game.players.models[0]);
                 });
 
@@ -234,7 +277,7 @@ define([
                     stubAjax($.Deferred()
                         .resolve({
                             game: joiningGame,
-                            players: [ baseNic ]
+                            players: [ joinedNic ]
                         })
                         .promise()
                     );
@@ -244,7 +287,7 @@ define([
                     app = App.init();
 
                     expect(app.game.players.length).to.equal(1);
-                    expect(app.game.players.models[0].attributes).to.include({ name: 'Nic', id: 10 });
+                    expect(app.game.players.models[0].attributes).to.eql(joinedNic);
                 });
 
                 it('should properly parse the joined players', function () {
@@ -252,8 +295,8 @@ define([
                         .resolve({
                             game: joiningGame,
                             players: [
-                                baseNic,
-                                baseKen
+                                joinedNic,
+                                joinedKen
                             ]
                         })
                         .promise()
@@ -262,7 +305,7 @@ define([
                     app = App.init();
 
                     expect(app.game.players.length).to.equal(2);
-                    expect(app.game.players.models[1].attributes).to.include({ name: 'Ken', id: 11 });
+                    expect(app.game.players.models[1].attributes).to.eql(joinedKen);
                 });
 
                 it('should show the joining view', function () {
@@ -283,7 +326,7 @@ define([
                     sinon.assert.calledOnce($.ajax);
                 });
 
-                it('should pass the current player\'s name to a call to join ', function () {
+                it('should pass the current player\'s attributes to a call to join ', function () {
                     setCurrentPlayer('Ken');
 
                     app = App.init();
@@ -294,7 +337,7 @@ define([
                     var ajaxArgs = $.ajax.secondCall.args;
                     expect(ajaxArgs.length).to.equal(1);
                     expect(ajaxArgs[0].url).to.match(/join_game/);
-                    expect(ajaxArgs[0].data.name).to.equal('Ken');
+                    expect(ajaxArgs[0].data.player).to.eql(_.omit(joinedKen, 'id'));
                 });
 
                 it('should not allow a player who has not yet joined to start the game', function () {
@@ -321,8 +364,8 @@ define([
                             .resolve({
                                 game: joiningGame,
                                 players: [
-                                    baseNic,
-                                    baseKen
+                                    joinedNic,
+                                    joinedKen
                                 ]
                             })
                             .promise()
@@ -544,7 +587,7 @@ define([
                     app.currentView.chooseFaction({ currentTarget: $('<button>').val('witches') });
 
                     // Should not have updated the non-active player
-                    expect(app.player.attributes).to.contain({ id: 11, name: 'Ken', faction: null });
+                    expect(app.player.attributes).to.contain({ id: 11, name: 'Ken', faction: '' });
 
                     // Should not have tried to save player changes
                     sinon.assert.calledOnce($.ajax);
@@ -577,7 +620,7 @@ define([
                     expect(app.player.attributes).to.contain({ id: 10, name: 'Nic', faction: 'witches' });
 
                     // Should update the active player, but stay in the drafting state
-                    expect(app.game.activePlayer.attributes).to.contain({ id: 11, name: 'Ken', faction: null });
+                    expect(app.game.activePlayer.attributes).to.contain({ id: 11, name: 'Ken', faction: '' });
                 });
 
                 it('should switch the game state once the lat player has chosen a faction', function () {
@@ -671,8 +714,85 @@ define([
         });
 
         describe('when the game is in bonuses mode', function () {
+            var bonusView;
+
+            before(function () {
+                bonusView = new Backbone.View({
+                    model: Bonus.expand({ key: 'power:shipping:', value: 0 })
+                });
+            });
+
+            beforeEach(function () {
+                stubAjax($.Deferred()
+                    .resolve({
+                        game: bonusesGame,
+                        players: [
+                            factionedNic,
+                            factionedKen
+                        ]
+                    })
+                    .promise()
+                );
+
+                sandbox.spy(Bonus.prototype, 'take');
+            });
+
             it('should initialize the game board from the fetch', function () {
-                // TODO
+                app = App.init();
+
+                expect(app.game.board).to.be.ok;
+
+                // 9 rows, even numbered rows have 13 hexes, odd numbered rows have 12
+                expect(app.game.board.hexes.length).to.equal(9);
+                expect(app.game.board.hexes[0].length).to.equal(13);
+                expect(app.game.board.hexes[1].length).to.equal(12);
+
+                expect(app.game.board.hexes[2][6].structure).to.be.ok;
+                expect(app.game.board.hexes[2][6].structure.attributes).to.contain({ type: 'dwelling' });
+                expect(app.game.board.hexes[2][6].structure.player.attributes).to.contain({ id: 10, name: 'Nic', faction: 'witches' });
+
+                expect(app.game.board.hexes[4][7].structure).to.be.ok;
+                expect(app.game.board.hexes[4][7].structure.attributes).to.contain({ type: 'dwelling' });
+                expect(app.game.board.hexes[4][7].structure.player.attributes).to.contain({ id: 11, name: 'Ken', faction: 'nomads' });
+            });
+
+            it('should show the bonuses view', function () {
+                app = App.init();
+
+                expect(app.modalView).to.be.ok;
+                expect(app.modalView.contentView instanceof BonusesView).to.be.ok;
+            });
+
+            it('shouldn\'t allow a non-active player to select a bonus', function () {
+                setCurrentPlayer('Ken');
+
+                app = App.init();
+
+                app.modalView.contentView.trigger('itemview:select:bonus', bonusView);
+
+                sinon.assert.notCalled(Bonus.prototype.take);
+            });
+
+            it('should update the active player when they select a bonus', function () {
+                app = App.init();
+
+                app.modalView.contentView.trigger('itemview:select:bonus', bonusView);
+
+                var prevPlayerAttrs = _.clone(app.player.attributes);
+
+                sinon.assert.calledOnce(Bonus.prototype.take);
+                sinon.assert.calledWith(Bonus.prototype.take, app.player);
+
+                // expect(app.player.bonus).to.equal(bonusView.model);
+                // expect(app.player.attributes).to.eql(
+                //     _.defaults({
+                //         shippingValue: prevPlayerAttrs.shippingValue + 1,
+                //         income: _.defaults({
+                //             power: prevPlayerAttrs.income.power + 3
+                //         },
+                //         prevPlayerAttrs.income)
+                //     }, prevPlayerAttrs)
+                // );
             });
         });
     });

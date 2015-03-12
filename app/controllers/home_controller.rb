@@ -34,7 +34,7 @@ class HomeController < ApplicationController
 
             # If a new game was created, save the name of the player who did
             # the creation
-            player_name = params[:player_name]
+            player = params[:player]
         end
 
         Game.connection.execute("END")
@@ -42,11 +42,11 @@ class HomeController < ApplicationController
         # Indicates that this player just created a new game. Create a new
         # Player and set it to be the active player in charge of the game
         # configuration stage.
-        if player_name
+        if player
             Game.uncached do
                 game = Game.last
             end
-            player = Player.create(:name => player_name, :game_id => game.id)
+            player = Player.create(JSON.parse(player).merge({ :game_id => game.id }))
             game.update_attributes(:active_player_id => player.id)
         end
 
@@ -106,7 +106,7 @@ class HomeController < ApplicationController
             return render :json => { :error => err}, :status => 403
         end
 
-        Player.create(:name => params[:name], :game_id => game.id)
+        Player.create(JSON.parse(params[:player]).merge({ :game_id => game.id }))
 
         return render :json => {
             :game => game,

@@ -58,7 +58,8 @@ define([
 
             var modal = new ModalView({
                 id: 'bonuses',
-                contentView: bonusesView
+                contentView: bonusesView,
+                app: this.app
             });
 
             this.listenTo(bonusesView, 'itemview:select:bonus', function (bonusView) {
@@ -68,7 +69,7 @@ define([
                 var bonus = bonusView.model;
                 bonus.take(this.app.player);
 
-                if (players.every(function (player) {
+                if (this.app.game.players.every(function (player) {
                     return !!player.bonus;
                 })) {
                     this.app.game.set({
