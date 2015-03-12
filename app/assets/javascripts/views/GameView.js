@@ -79,6 +79,7 @@ define([
                 }
 
                 this.app.game.activateNextPlayer();
+                this.app.game.save();
             });
 
 

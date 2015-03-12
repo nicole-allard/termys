@@ -122,8 +122,15 @@ define([
             if (this.get('board'))
                 this.updateBoard();
 
-            if (this.get('bonuses'))
+            if (this.get('bonuses')) {
+                var hadBonuses = !!this.bonuses;
                 this.updateCollection('bonuses', Bonus);
+
+                if (!hadBonuses) {
+                    this.listenTo(this.bonuses, 'taken', _.bind(this.bonuses.remove, this.bonuses));
+                    this.listenTo(this.bonuses, 'yielded', _.bind(this.bonuses.add, this.bonuses));
+                }
+            }
 
             // TODO turn the following attrs into properties:
             // cults

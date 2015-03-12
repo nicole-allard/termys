@@ -98,11 +98,20 @@ define([
         },
 
         deserialize: function () {
-            if (this.get('bonus')) {
+            var bonus = this.get('bonus');
+            if (bonus === null)
+                this.bonus = null;
+            else if (bonus)
                 this.bonus = UniqueModel.get(Bonus, this.get('bonus'));
-                this.trigger('changeProperty:bonus');
-                this.unset('bonus');
-            }
+
+            this.unset('bonus');
+            this.trigger('changeProperty:bonus');
+
+            _.each(['power', 'supply', 'income'], function (attrName) {
+                var val = this.get(attrName);
+                if (val && typeof val === 'string')
+                    this.set(attrName, JSON.parse(val), { silent: true });
+            }, this);
         },
 
         updateCookie: function () {

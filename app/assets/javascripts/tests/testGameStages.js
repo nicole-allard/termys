@@ -607,6 +607,8 @@ define([
                     expect(ajaxArgs.data.game.players[0]).to.contain({ id: 10, name: 'Nic', faction: 'witches' });
                 });
 
+                // TODO test that the faction shim was called when the player chose a faction
+
                 it('should update the game and players once the active player has chosen a faction', function () {
                     app = App.init();
 
@@ -623,7 +625,7 @@ define([
                     expect(app.game.activePlayer.attributes).to.contain({ id: 11, name: 'Ken', faction: '' });
                 });
 
-                it('should switch the game state once the lat player has chosen a faction', function () {
+                it('should switch the game state once the last player has chosen a faction', function () {
                     setCurrentPlayer('Ken');
 
                     app = App.init();
@@ -716,12 +718,6 @@ define([
         describe('when the game is in bonuses mode', function () {
             var bonusView;
 
-            before(function () {
-                bonusView = new Backbone.View({
-                    model: Bonus.expand({ key: 'power:shipping:', value: 0 })
-                });
-            });
-
             beforeEach(function () {
                 stubAjax($.Deferred()
                     .resolve({
@@ -733,6 +729,10 @@ define([
                     })
                     .promise()
                 );
+
+                bonusView = new Backbone.View({
+                    model: Bonus.expand({ key: 'power:shipping:', value: 0 })
+                });
 
                 sandbox.spy(Bonus.prototype, 'take');
             });
@@ -776,23 +776,56 @@ define([
             it('should update the active player when they select a bonus', function () {
                 app = App.init();
 
-                app.modalView.contentView.trigger('itemview:select:bonus', bonusView);
-
                 var prevPlayerAttrs = _.clone(app.player.attributes);
+
+                // Stub game save, otherwise the response will be parsed and overwrite the values set
+                // before the save
+                sandbox.stub(app.game, 'save');
+
+                // Trigger taking the bonus
+                app.modalView.contentView.trigger('itemview:select:bonus', bonusView);
 
                 sinon.assert.calledOnce(Bonus.prototype.take);
                 sinon.assert.calledWith(Bonus.prototype.take, app.player);
 
-                // expect(app.player.bonus).to.equal(bonusView.model);
-                // expect(app.player.attributes).to.eql(
-                //     _.defaults({
-                //         shippingValue: prevPlayerAttrs.shippingValue + 1,
-                //         income: _.defaults({
-                //             power: prevPlayerAttrs.income.power + 3
-                //         },
-                //         prevPlayerAttrs.income)
-                //     }, prevPlayerAttrs)
-                // );
+                expect(app.player.bonus).to.equal(bonusView.model);
+                expect(app.player.attributes).to.eql(
+                    _.defaults({
+                        shippingValue: prevPlayerAttrs.shippingValue + 1,
+                        income: _.defaults({
+                            power: prevPlayerAttrs.income.power + 3
+                        },
+                        prevPlayerAttrs.income)
+                    }, prevPlayerAttrs)
+                );
+            });
+
+            it('should remove the chosen bonus from the game\'s bonuses once a player takes one' , function () {
+                app = App.init();
+
+                expect(app.game.bonuses.length).to.equal(5);
+                expect(app.game.bonuses.findWhere({ id: bonusView.model.id })).to.be.ok;
+
+                // Stub game save, otherwise the response will be parsed and overwrite the values set
+                // before the save
+                sandbox.stub(app.game, 'save');
+
+                // Trigger taking the bonus
+                app.modalView.contentView.trigger('itemview:select:bonus', bonusView);
+
+                expect(app.game.bonuses.length).to.equal(4);
+            });
+
+            it('should update the active player once they\'ve chosen a bonus ', function () {
+
+            });
+
+            it('should call save once the player takes a bonus', function () {
+
+            });
+
+            it('should update the game state to active once all the player have chosen a bonus', function () {
+
             });
         });
     });

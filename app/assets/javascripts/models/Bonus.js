@@ -54,6 +54,8 @@ define([
             });
             this.listenTo(player, 'pass', this.get('passBonus'));
 
+            this.trigger('taken', this, player);
+
             // No need to handle the special action, the BonusView will call the special
             // action should the player click the button to perform it
         },
@@ -71,13 +73,16 @@ define([
             // Remove bonus income and bonus shipping value.
             player.set({
                 income: newIncome,
-                shippingValue: Math.max(0, player.get('shippingValue') - this.get('shippingValue'))
+                shippingValue: Math.max(0, player.get('shippingValue') - this.get('shippingValue')),
+                bonus: null
             });
 
             // Remove pass bonus handler when the player passes and delete
             // the bonus handler bound to the given player.
             this.stopListening(player, 'pass', this.get('passBonus'));
             this.unset('passBonus');
+
+            this.trigger('yielded', this, player);
         },
 
         serialize: function () {
