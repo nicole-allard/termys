@@ -296,7 +296,31 @@ define([
                     app = App.init();
 
                     expect(app.game.players.length).to.equal(1);
-                    expect(app.game.players.models[0].attributes).to.eql(joinedNic);
+                    var initialPlayer = app.game.players.models[0];
+                    // Compare primitive attributes directly, and then more deeply compare
+                    // values that are parsed into objects
+                    expect(initialPlayer.attributes).to.contain(_.omit(joinedNic, ['income', 'power', 'supply', 'bonus']));
+                    expect(initialPlayer.attributes.income).to.eql({
+                        power: 0,
+                        coins: 0,
+                        workers: 0,
+                        priests: 0
+                    });
+                    expect(initialPlayer.attributes.power).to.eql({
+                        1: 0,
+                        2: 0,
+                        3: 0
+                    });
+                    expect(initialPlayer.attributes.supply).to.eql({
+                        priests: 7,
+                        dwellings: 10,
+                        tradingHouses: 4,
+                        temples: 3,
+                        strongholds: 1,
+                        sanctuaries: 1,
+                        bridges: 3
+                    });
+                    expect(initialPlayer.attributes.bonus).not.to.be.ok;
                 });
 
                 it('should properly parse the joined players', function () {
@@ -314,7 +338,29 @@ define([
                     app = App.init();
 
                     expect(app.game.players.length).to.equal(2);
-                    expect(app.game.players.models[1].attributes).to.eql(joinedKen);
+                    var joinedPlayer = app.game.players.models[1];
+                    expect(joinedPlayer.attributes).to.contain(_.omit(joinedKen, ['income', 'power', 'supply', 'bonus']));
+                    expect(joinedPlayer.attributes.income).to.eql({
+                        power: 0,
+                        coins: 0,
+                        workers: 0,
+                        priests: 0
+                    });
+                    expect(joinedPlayer.attributes.power).to.eql({
+                        1: 0,
+                        2: 0,
+                        3: 0
+                    });
+                    expect(joinedPlayer.attributes.supply).to.eql({
+                        priests: 7,
+                        dwellings: 10,
+                        tradingHouses: 4,
+                        temples: 3,
+                        strongholds: 1,
+                        sanctuaries: 1,
+                        bridges: 3
+                    });
+                    expect(joinedPlayer.attributes.bonus).not.to.be.ok;
                 });
 
                 it('should show the joining view', function () {
