@@ -65,11 +65,13 @@ define([
 
         initialize: function (attributes, options) {
             this.on('change:name', this.updateCookie);
-            this.on('change', this.deserialize);
             this.on('change:faction', this.initializeFaction);
             this.on('build:structure', this.updateStructures);
 
             this.app = options.app;
+
+            this.on('change', this.deserialize);
+            this.deserialize();
         },
 
         initializeFaction: function () {

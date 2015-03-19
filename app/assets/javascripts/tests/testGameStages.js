@@ -33,6 +33,9 @@ define([
         this.timeout(0);
 
         var setCurrentPlayer = function (name) {
+            if (cookies.read.restore && cookies.read.restore.sinon)
+                cookies.read.restore();
+
             sandbox.stub(cookies, 'read')
                 .withArgs(Player.USER_COOKIE)
                 .returns(name);
@@ -147,6 +150,12 @@ define([
         factionedKen = _.defaults({
             faction: 'nomads'
         }, orderedKen),
+        bonusedNic = _.defaults({
+            bonus: 'power:shipping:'
+        }, factionedNic),
+        bonusedKen = _.defaults({
+            bonus: 'coins:spade:',
+        }, factionedKen),
 
         sandbox, app;
 
@@ -206,7 +215,7 @@ define([
         });
 
         describe('after player has authenticated', function () {
-            before(function () {
+            beforeEach(function () {
                 setCurrentPlayer('Nic');
             });
 
@@ -651,6 +660,8 @@ define([
 
         describe('when the game is in dwellings mode', function () {
             beforeEach(function () {
+                setCurrentPlayer('Nic');
+
                 stubAjax($.Deferred()
                     .resolve({
                         game: dwellingsGame,
@@ -719,6 +730,8 @@ define([
             var bonusView;
 
             beforeEach(function () {
+                setCurrentPlayer('Nic');
+
                 stubAjax($.Deferred()
                     .resolve({
                         game: bonusesGame,
@@ -814,18 +827,63 @@ define([
                 app.modalView.contentView.trigger('itemview:select:bonus', bonusView);
 
                 expect(app.game.bonuses.length).to.equal(4);
-            });
-
-            it('should update the active player once they\'ve chosen a bonus ', function () {
-
+                expect(app.game.bonuses.findWhere({ id: bonusView.model.id })).not.to.be.ok;
             });
 
             it('should call save once the player takes a bonus', function () {
+                app = App.init();
 
+                $.ajax.reset();
+
+                var prevPlayerAttrs = _.clone(app.player.attributes);
+
+                // Trigger taking the bonus
+                app.modalView.contentView.trigger('itemview:select:bonus', bonusView);
+
+                sinon.assert.calledOnce($.ajax);
+                var ajaxArgs = $.ajax.firstCall.args[0];
+                expect(ajaxArgs.url).to.match(/update_game/);
+                expect(ajaxArgs.data.game.bonuses).to.be.a('string');
+
+                var bonuses = JSON.parse(ajaxArgs.data.game.bonuses);
+                expect(bonuses).to.be.a('object');
+                expect(_.keys(bonuses).length).to.equal(4);
+                expect(bonuses).to.contain({
+                    'coins:spade:': 0,
+                    'coins::': 0,
+                    'workers::stronghold,sanctuary': 0,
+                    'workers,power::': 0
+                });
+                expect(bonuses).not.to.contain({
+                    'power:shipping:': 0
+                });
             });
 
-            it('should update the game state to active once all the player have chosen a bonus', function () {
+            it('should update the game state to active after the last player chooses a bonus', function () {
+                setCurrentPlayer('Ken');
 
+                stubAjax($.Deferred()
+                    .resolve({
+                        game: bonusesGame,
+                        players: [
+                            bonusedNic,
+                            factionedKen
+                        ]
+                    })
+                    .promise()
+                );
+
+                app = App.init();
+                app.game.set({ activePlayerId: 11 });
+
+                // Stub game save, otherwise the response will be parsed and overwrite the values set
+                // before the save
+                sandbox.stub(app.game, 'save');
+
+                // Trigger taking the bonus
+                app.modalView.contentView.trigger('itemview:select:bonus', bonusView);
+
+                expect(app.game.attributes.state).to.equal('active');
             });
         });
     });
