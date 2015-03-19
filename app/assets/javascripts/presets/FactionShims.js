@@ -36,13 +36,7 @@ define([
                     3: 0
                 },
                 workers: 3,
-                supply: {
-                    dwellings: 6
-                },
                 landSkippingValue: 1,
-                income: {
-                    workers: 3
-                }
             },
             cults: {
                 air: 1,
@@ -63,19 +57,204 @@ define([
                 }
             }
         }),
-        nomads: $.noop,
-        chaos: $.noop,
-        giants: $.noop,
-        swarmlings: $.noop,
-        mermaids: $.noop,
-        dwarves: $.noop,
-        engineers: $.noop,
-        halflings: $.noop,
-        cultists: $.noop,
-        alchemists: $.noop,
-        darklings: $.noop,
-        auren: $.noop,
-        witches: $.noop
-        // TODO add other faction shims
+        nomads: _.partial(initializeFaction, {
+            resources: {
+                coins: 15,
+                power: {
+                    1: 5,
+                    2: 7,
+                    3: 0
+                },
+                workers: 2
+            },
+            cults: {
+                fire: 1,
+                earth: 1
+            }
+        }),
+        chaos: _.partial(initializeFaction, {
+            resources: {
+                coins: 15,
+                power: {
+                    1: 5,
+                    2: 7,
+                    3: 0
+                },
+                workers: 4,
+                income: {
+                    workers: 2
+                }
+            },
+            cults: {
+                fire: 2
+            }
+        }),
+        giants: _.partial(initializeFaction, {
+            resources: {
+                coins: 15,
+                power: {
+                    1: 5,
+                    2: 7,
+                    3: 0
+                },
+                workers: 3
+            },
+            cults: {
+                fire: 1,
+                air: 1
+            }
+        }),
+        swarmlings: _.partial(initializeFaction, {
+            resources: {
+                coins: 20,
+                power: {
+                    1: 3,
+                    2: 9,
+                    3: 0
+                },
+                workers: 8,
+                income: {
+                    workers: 2
+                }
+            },
+            cults: {
+                earth: 1,
+                water: 1,
+                fire: 1,
+                air: 1
+            }
+        }),
+        mermaids: _.partial(initializeFaction, {
+            resources: {
+                coins: 15,
+                power: {
+                    1: 3,
+                    2: 9,
+                    3: 0
+                },
+                workers: 3
+            },
+            cults: {
+                water: 2
+            }
+        }),
+        dwarves: _.partial(initializeFaction, {
+            resources: {
+                coins: 15,
+                power: {
+                    1: 5,
+                    2: 7,
+                    3: 0
+                },
+                workers: 3
+            },
+            cults: {
+                earth: 2
+            }
+        }),
+        engineers: _.partial(initializeFaction, {
+            resources: {
+                coins: 10,
+                power: {
+                    1: 3,
+                    2: 9,
+                    3: 0
+                },
+                workers: 2,
+                income: {
+                    workers: 0
+                }
+            }
+        }),
+        halflings: _.partial(initializeFaction, {
+            resources: {
+                coins: 15,
+                power: {
+                    1: 3,
+                    2: 9,
+                    3: 0
+                },
+                workers: 3
+            },
+            cults: {
+                earth: 1,
+                air: 1
+            }
+        }),
+        cultists: _.partial(initializeFaction, {
+            resources: {
+                coins: 15,
+                power: {
+                    1: 5,
+                    2: 7,
+                    3: 0
+                },
+                workers: 3
+            },
+            cults: {
+                earth: 1,
+                fire: 1
+            }
+        }),
+        alchemists: _.partial(initializeFaction, {
+            resources: {
+                coins: 15,
+                power: {
+                    1: 5,
+                    2: 7,
+                    3: 0
+                },
+                workers: 3
+            },
+            cults: {
+                water: 1,
+                fire: 1
+            }
+        }),
+        darklings: _.partial(initializeFaction, {
+            resources: {
+                coins: 15,
+                power: {
+                    1: 5,
+                    2: 7,
+                    3: 0
+                },
+                workers: 1,
+                priests: 2
+            },
+            cults: {
+                water: 1,
+                earth: 1
+            }
+        }),
+        auren: _.partial(initializeFaction, {
+            resources: {
+                coins: 15,
+                power: {
+                    1: 5,
+                    2: 7,
+                    3: 0
+                },
+                workers: 3
+            },
+            cults: {
+                water: 1,
+                air: 1
+            }
+        }),
+        witches: _.partial(initializeFaction, {
+            resources: {
+                coins: 15,
+                power: {
+                    1: 5,
+                    2: 7,
+                    3: 0
+                },
+                workers: 3
+            },
+            cults: {
+                air: 2
+            }
+        })
     };
 });

@@ -4,6 +4,7 @@ define([
     'app',
 
     'presets/PresetGames',
+    'presets/FactionShims',
     'models/common/UniqueModel',
     'models/Game',
     'models/Player',
@@ -19,6 +20,7 @@ define([
     App,
 
     PresetGames,
+    FactionShims,
     UniqueModel,
     Game,
     Player,
@@ -110,7 +112,7 @@ define([
             bonus: null,
             coins: 0,
             faction: '',
-            income: '{"power":0,"coins":0,"workers":0,"priests":0}',
+            income: '{"power":0,"coins":0,"workers":1,"priests":0}',
             landSkippingValue: 0,
             numKeys: 0,
             power: '{"1":0,"2":0,"3":0}',
@@ -127,7 +129,7 @@ define([
             bonus: null,
             coins: 0,
             faction: '',
-            income: '{"power":0,"coins":0,"workers":0,"priests":0}',
+            income: '{"power":0,"coins":0,"workers":1,"priests":0}',
             landSkippingValue: 0,
             numKeys: 0,
             power: '{"1":0,"2":0,"3":0}',
@@ -303,7 +305,7 @@ define([
                     expect(initialPlayer.attributes.income).to.eql({
                         power: 0,
                         coins: 0,
-                        workers: 0,
+                        workers: 1,
                         priests: 0
                     });
                     expect(initialPlayer.attributes.power).to.eql({
@@ -343,7 +345,7 @@ define([
                     expect(joinedPlayer.attributes.income).to.eql({
                         power: 0,
                         coins: 0,
-                        workers: 0,
+                        workers: 1,
                         priests: 0
                     });
                     expect(joinedPlayer.attributes.power).to.eql({
@@ -662,8 +664,6 @@ define([
                     expect(ajaxArgs.data.game.players[0]).to.contain({ id: 10, name: 'Nic', faction: 'witches' });
                 });
 
-                // TODO test that the faction shim was called when the player chose a faction
-
                 it('should update the game and players once the active player has chosen a faction', function () {
                     app = App.init();
 
@@ -678,6 +678,35 @@ define([
 
                     // Should update the active player, but stay in the drafting state
                     expect(app.game.activePlayer.attributes).to.contain({ id: 11, name: 'Ken', faction: '' });
+                });
+
+                it('should apply the faction shim when the player chooses a faction', function () {
+                    app = App.init();
+
+                    // Stub game save, otherwise the response will be parsed and overwrite the values set
+                    // before the save
+                    sandbox.stub(app.game, 'save');
+
+                    sinon.spy(FactionShims, 'chaos');
+
+                    app.currentView.chooseFaction({ currentTarget: $('<button>').val('chaos') });
+
+                    sinon.assert.calledOnce(FactionShims.chaos);
+                    expect(app.player.attributes).to.contain({
+                        id: 10,
+                        name: 'Nic',
+                        faction: 'chaos',
+                        coins: 15,
+                        workers: 4
+                    });
+                    expect(app.player.attributes.income).to.contain({
+                        workers: 2
+                    });
+                    expect(app.player.attributes.power).to.eql({
+                        1: 5,
+                        2: 7,
+                        3: 0
+                    });
                 });
 
                 it('should switch the game state once the last player has chosen a faction', function () {

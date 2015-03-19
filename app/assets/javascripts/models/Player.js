@@ -52,7 +52,7 @@ define([
             income: {
                 power: 0,
                 coins: 0,
-                workers: 0,
+                workers: 1,
                 priests: 0
             }
             // TODO figure out how to store spade cost, increase track, etc.
