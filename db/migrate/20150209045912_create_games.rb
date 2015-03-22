@@ -4,6 +4,7 @@ class CreateGames < ActiveRecord::Migration
       t.string :state
       t.string :config
       t.integer :active_player_id
+      t.integer :starting_player_id
       t.text :blocking_players
       t.text :board
       t.text :rounds

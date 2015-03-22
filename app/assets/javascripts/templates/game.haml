@@ -1,3 +1,7 @@
+.state
+    .players
+        :each player in players
+            %div{ class: 'player ' + player.color + (player.isActivePlayer ? ' active' : '') + (player.isStartingPlayer ? ' starting' : '')}= player.name
 %section.js-board
 %button.btn.btn-default.js-show-bonuses
     Show Bonuses

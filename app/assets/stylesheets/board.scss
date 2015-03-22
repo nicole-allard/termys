@@ -32,37 +32,37 @@
         display: inline-block;
     }
 
-    /*.hex.river {
+    .hex.river {
         background-color: #74CCF7;
     }
 
     .hex.plains {
-        background-color: #8C7343;
+        background-color: $brown;
     }
 
     .hex.swamp {
-        background-color: #404A38;
+        background-color: $black;
     }
 
     .hex.lakes {
-        background-color: #0077CC;
+        background-color: $blue;
     }
 
     .hex.forest {
-        background-color: #189E3C;
+        background-color: $green;
     }
 
     .hex.mountains {
-        background-color: #B8B8B8
+        background-color: $grey;
     }
 
     .hex.wasteland {
-        background-color: #CF5744;
+        background-color: $red;
     }
 
     .hex.desert {
-        background-color: #FFE852;
-    }*/
+        background-color: $yellow;
+    }
 
     .structure {
         background-color: transparent;
@@ -76,7 +76,7 @@
     }
 
     @each $structure in dwelling, trading-house, temple, stronghold, sanctuary, bridge {
-        @each $color in green, yellow, black, brown, blue, red, grey {
+        @each $color in $colors {
             .structure.#{$structure}.#{$color} {
                 background-image: image-url("#{$structure}-#{$color}.png");
             }

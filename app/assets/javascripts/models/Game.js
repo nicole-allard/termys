@@ -22,6 +22,7 @@ define([
     var Game = Backbone.Model.extend({
         // properties: {
         //     activePlayer: Player,
+        //     startingPlayer: Player,
         //     blockingPlayers: { blocked: Collection(Player)}
         //     players: Collection(Player),
         //     rounds: Collection(Round),
@@ -70,6 +71,7 @@ define([
                 rounds: PresetGames.rounds,
                 bonuses: PresetGames.players[this.players.length].bonuses,
                 activePlayerId: this.players.first().id,
+                startingPlayerId: this.players.first().id,
                 state: 'drafting'
             });
 
@@ -110,11 +112,16 @@ define([
          * (basically anything that's a model or collection)
          */
         deserialize: function () {
-            if (this.get('players'))
+            if (this.get('players')) {
                 this.updateCollection('players', Player, { comparator: 'turnPosition' });
+                this.players.sort();
+            }
 
             if (this.get('activePlayerId'))
-                this.updateActivePlayer();
+                this.updatePlayer('activePlayer', 'activePlayerId');
+
+            if (this.get('startingPlayerId'))
+                this.updatePlayer('startingPlayer', 'startingPlayerId');
 
             if (this.get('rounds'))
                 this.updateCollection('rounds', Round);
@@ -186,17 +193,18 @@ define([
         },
 
         /**
-         * Updates the activePlayer with the player specified by id.
-         * Once the activePlayer is set, deletes the attribute.
+         * Updates the property with the given name with the player specified by
+         * id in given attribute.
+         * Once the property is set, deletes the attribute.
          */
-        updateActivePlayer: function () {
-            var newActivePlayer = this.players.findWhere({ id: this.get('activePlayerId') });
-            if (newActivePlayer !== this.activePlayer) {
-                this.activePlayer = newActivePlayer;
-                this.trigger('changeProperty:activePlayer');
+        updatePlayer: function (propertyName, attrName) {
+            var newPlayer = this.players.findWhere({ id: this.get(attrName) });
+            if (newPlayer !== this[propertyName]) {
+                this[propertyName] = newPlayer;
+                this.trigger('changeProperty:' + propertyName);
             }
 
-            this.unset('activePlayerId', { silent: true });
+            this.unset(attrName, { silent: true });
         },
 
         /**
@@ -211,6 +219,13 @@ define([
             this.trigger('changeProperty:board');
         },
 
+        toJSON: function () {
+            return _.extend({
+                activePlayer: this.activePlayer.toJSON(),
+                players: this.players.toJSON()
+            }, this.attributes);
+        },
+
         /**
          * Returns the minimal json representation of the game that can
          * be save to the db and parsed by the frontend models
@@ -219,6 +234,7 @@ define([
             return _.extend({
                 players: this.players.invoke('serialize'),
                 activePlayerId: this.activePlayer.id,
+                startingPlayerId: this.startingPlayer ? this.startingPlayer.id : null,
                 rounds: this.rounds ? JSON.stringify(this.rounds.invoke('serialize')) : null,
                 board: JSON.stringify(this.board.serialize()),
                 bonuses: this.bonuses ? JSON.stringify(_.extend.apply(_, this.bonuses.invoke('serialize'))) : null

@@ -1,3 +1,35 @@
-// Place all the styles related to the Home controller here.
-// They will automatically be included in application.css.
-// You can use Sass (SCSS) here: http://sass-lang.com/
+.player {
+    display: inline-block;
+    padding: 0 5px;
+    border: 5px solid transparent;
+
+    &.active {
+        border-color: orange;
+    }
+
+    &.green {
+        background-color: $green;
+    }
+
+    &.brown {
+        background-color: $brown;
+    }
+
+    &.black {
+        background-color: $black;
+        color: white;
+    }
+
+    &.blue {
+        background-color: $blue;
+        color: white;
+    }
+
+    &.red {
+        background-color: $red;
+    }
+
+    &.yellow {
+        background-color: $yellow;
+    }
+}

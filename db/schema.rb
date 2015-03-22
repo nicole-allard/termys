@@ -17,6 +17,7 @@ ActiveRecord::Schema.define(version: 20150209045912) do
     t.string   "state"
     t.string   "config"
     t.integer  "active_player_id"
+    t.integer  "starting_player_id"
     t.text     "blocking_players"
     t.text     "board"
     t.text     "rounds"

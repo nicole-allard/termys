@@ -94,6 +94,10 @@ define([
             return this.app.game && this === this.app.game.activePlayer;
         },
 
+        isStartingPlayer: function () {
+            return this.app.game && this === this.app.game.startingPlayer;
+        },
+
         isLastPlayer: function () {
             var players = this.app.game.players;
             return players.indexOf(this) === players.length - 1;
@@ -150,7 +154,9 @@ define([
 
         toJSON: function () {
             return _.extend({
-                isActivePlayer: this.isActivePlayer()
+                isActivePlayer: this.isActivePlayer(),
+                isStartingPlayer: this.isStartingPlayer(),
+                color: Player.FACTION_COLORS[this.get('faction')]
             }, this.attributes);
         },
 

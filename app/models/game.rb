@@ -10,6 +10,8 @@ class Game < ActiveRecord::Base
     #
     # active_player_id: id of the active player
     #
+    # starting_player_id: id of the starting player
+    #
     # blocking_players: json object. keys are what is blocked from completion by the player ids
     #                   listed in the array value. Object only contains nonempty lists, or is null.
     #                   {
