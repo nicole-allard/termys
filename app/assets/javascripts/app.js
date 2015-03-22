@@ -96,6 +96,11 @@ define([
                 }));
                 this.game.handleInitialBonuses();
                 return;
+            case 'active':
+                this.showView(new GameView({
+                    app: this,
+                    model: this.game
+                }));
             }
         },
 
