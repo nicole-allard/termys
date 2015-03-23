@@ -13,6 +13,11 @@ define([
 
     var BoardView = Marionette.ItemView.extend({
         template: Haml(boardTemplate),
+        templateHelpers: function () {
+            return {
+                reverseRounds: this.model.rounds.toJSON().reverse()
+            };
+        },
 
         initialize: function (options) {
             this.app = options.app;

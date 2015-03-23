@@ -223,6 +223,8 @@ define([
 
         toJSON: function () {
             return _.extend({
+                board: this.board.toJSON(),
+                rounds: this.rounds.toJSON(),
                 activePlayer: this.activePlayer.toJSON(),
                 players: this.players.toJSON()
             }, this.attributes);

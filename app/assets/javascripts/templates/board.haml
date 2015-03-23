@@ -1,7 +1,10 @@
 .board
-    :each index, row in hexes
+    :each index, row in board.hexes
         %div{ class: 'row' + (index % 2 ? ' row-offset' : '') }
             :each hex in row
                 %div{ class: 'hex ' + (hex ? hex.terrain : '') }
                     :if hex.structure
                         %span{ class: (['structure', hex.structure.type, hex.structure.color].join(' ')) }
+    .rounds
+        :each round in reverseRounds
+            %div{ class: 'round ' + round.id.replace(/:/g, '-') }

@@ -82,4 +82,30 @@
             }
         }
     }
+
+    .rounds {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin-left: 6.5%;
+        margin-top: 39%;
+
+        .round {
+            background-size: 100%;
+            background-attachment: scroll;
+            background-repeat: no-repeat;
+            background-position: 0 0;
+            height: 63%;
+            width: 11.7%;
+            margin-bottom: 1.1%;
+        }
+
+        @each $round in fire-power, water-priests, air-spades, water-spades, air-workers, fire-workers, earth-coins, earth-spades {
+            .round.#{$round} {
+                background-image: image-url("round-#{$round}.png");
+            }
+        }
+    }
 }

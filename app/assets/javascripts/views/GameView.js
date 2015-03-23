@@ -43,7 +43,7 @@ define([
 
         onShow: function () {
             this.boardRegion.show(new BoardView({
-                model: this.model.board,
+                model: this.model,
                 app: this.app
             }));
 
