@@ -11,6 +11,10 @@
     &:first-child {
         margin-left: 0
     }
+
+    &.selectable:hover {
+        cursor: pointer;
+    }
 }
 
 @each $bonus in priests--, workers-power--, coins--, power-shipping-, coins-spade-, coins-cult-, coins--dwelling, workers--tradinghouse, workers--stronghold-sanctuary {

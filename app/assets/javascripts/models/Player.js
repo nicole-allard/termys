@@ -107,8 +107,11 @@ define([
             var bonus = this.get('bonus');
             if (bonus === null)
                 this.bonus = null;
-            else if (bonus)
-                this.bonus = UniqueModel.get(Bonus, this.get('bonus'));
+            else if (_.isString(bonus))
+                bonus = JSON.parse(bonus);
+
+            if (_.isObject(bonus))
+                this.bonus = Bonus.expand({ app: this.app }, bonus);
 
             this.unset('bonus');
             this.trigger('changeProperty:bonus');
@@ -165,7 +168,7 @@ define([
         serialize: function () {
             return _.extend(
                 {
-                    bonus: this.bonus && this.bonus.serialize() || null
+                    bonus: this.bonus && JSON.stringify(this.bonus.serialize()) || null
                 },
                 _.chain(this.attributes)
                 .map(function (value, key) {

@@ -932,6 +932,11 @@ define([
                 expect(bonuses).not.to.contain({
                     'power:shipping:': 0
                 });
+
+                var playerBonus = ajaxArgs.data.game.players[0].bonus;
+                expect(playerBonus).is.a('string');
+                playerBonus = JSON.parse(playerBonus);
+                expect(playerBonus).to.eql({ 'power:shipping:':0 });
             });
 
             it('should update the game state to active after the last player chooses a bonus', function () {

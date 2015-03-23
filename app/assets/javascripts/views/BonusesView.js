@@ -5,7 +5,6 @@ define([
     'models/Bonus',
     'models/Player',
 
-    'text!templates/bonuses.haml',
     'text!templates/bonus.haml'
 ], function (
     Marionette,
@@ -14,7 +13,6 @@ define([
     Bonus,
     Player,
 
-    bonusesTemplate,
     bonusTemplate
 ) {
     var BonusView = Marionette.ItemView.extend({
@@ -41,8 +39,7 @@ define([
         }
     });
 
-    var BonusesView = Marionette.CompositeView.extend({
-        template: Haml(bonusesTemplate),
+    var BonusesView = Marionette.CollectionView.extend({
         itemView: BonusView,
         itemViewOptions: function () {
             return {
@@ -50,7 +47,6 @@ define([
                 allowSelection: this.allowSelection
             };
         },
-        itemViewContainer: '.js-game-bonuses',
 
         initialize: function (options) {
             // True if the active user can click on a bonus view, false

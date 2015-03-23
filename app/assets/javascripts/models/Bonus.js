@@ -44,14 +44,17 @@ define([
                 income: newIncome,
                 shippingValue: player.get('shippingValue') + this.get('shippingValue'),
                 coins: player.get('coins') + this.get('coins'),
-                bonus: this.id
+                bonus: this.serialize()
             });
 
             // Create a function bound to the given player and execute
             // the function when the player passes.
+            // Remove coins taken by the player.
             this.set({
-                passBonus: _.partial(Bonus.passBonuses[this.get('passBonusName')], player)
+                passBonus: _.partial(Bonus.passBonuses[this.get('passBonusName')], player),
+                coins: 0
             });
+
             this.listenTo(player, 'pass', this.get('passBonus'));
 
             this.trigger('taken', this, player);

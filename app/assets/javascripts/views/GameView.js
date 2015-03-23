@@ -22,7 +22,8 @@ define([
     var GameView = Marionette.Layout.extend({
         template: Haml(gameTemplate),
         regions: {
-            boardRegion: '.js-board'
+            boardRegion: '.js-board',
+            bonusesRegion: '.js-bonuses'
         },
 
         events: {
@@ -43,6 +44,11 @@ define([
         onShow: function () {
             this.boardRegion.show(new BoardView({
                 model: this.model.board,
+                app: this.app
+            }));
+
+            this.bonusesRegion.show(new BonusesView({
+                collection: this.model.bonuses,
                 app: this.app
             }));
         },

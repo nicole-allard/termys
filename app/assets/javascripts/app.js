@@ -97,7 +97,7 @@ define([
                 this.game.handleInitialBonuses();
                 return;
             case 'active':
-                this.showView(new GameView({
+                this._showView(new GameView({
                     app: this,
                     model: this.game
                 }));
@@ -106,6 +106,7 @@ define([
 
         _showView: function (view) {
             this.currentView = view;
+            $('.modal').modal('hide');
             $('.game-container').html(view.render().$el);
             view.triggerMethod('show');
         }

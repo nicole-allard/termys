@@ -169,6 +169,8 @@ define([
             var collection = this[propertyName];
             if (!collection)
                 collection = this[propertyName] = new Backbone.Collection([], collectionOptions);
+            else
+                collection.reset([], collectionOptions);
 
             var app = this.app,
                 value = this.get(attrName);
