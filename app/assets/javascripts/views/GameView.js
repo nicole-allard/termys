@@ -5,6 +5,7 @@ define([
     'views/BoardView',
     'views/ModalView',
     'views/BonusesView',
+    'views/BonusSelectionView',
 
     'text!templates/game.haml'
 ], function (
@@ -14,6 +15,7 @@ define([
     BoardView,
     ModalView,
     BonusesView,
+    BonusSelectionView,
 
     gameTemplate
 ) {
@@ -56,10 +58,10 @@ define([
         showBonuses: function (player) {
             // Open a modal, fill it with the bonuses view.
             // listen to a pick event, close the modal
-            var bonusesView = new BonusesView({
+            var bonusesView = new BonusSelectionView({
+                model: this.model,
                 collection: this.model.bonuses,
-                app: this.app,
-                allowSelection: true
+                app: this.app
             });
 
             var modal = new ModalView({

@@ -39,7 +39,14 @@ define([
         }
     });
 
-    var BonusesView = Marionette.CollectionView.extend({
+    /**
+     * A collection view of bonuses. Written as a composite view so it can be extended,
+     * but default template is empty and only the collection of BonusViews are shown.
+     */
+    var BonusesView = Marionette.CompositeView.extend({
+        template: function () {
+            return '';
+        },
         itemView: BonusView,
         itemViewOptions: function () {
             return {

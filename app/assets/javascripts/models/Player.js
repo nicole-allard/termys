@@ -111,7 +111,7 @@ define([
                 bonus = JSON.parse(bonus);
 
             if (_.isObject(bonus))
-                this.bonus = Bonus.expand({ app: this.app }, bonus);
+                this.bonus = Bonus.expand({ app: this.app, key: _.keys(bonus)[0], value: _.values(bonus)[1] });
 
             this.unset('bonus');
             this.trigger('changeProperty:bonus');
@@ -159,7 +159,8 @@ define([
             return _.extend({
                 isActivePlayer: this.isActivePlayer(),
                 isStartingPlayer: this.isStartingPlayer(),
-                color: Player.FACTION_COLORS[this.get('faction')]
+                color: Player.FACTION_COLORS[this.get('faction')],
+                bonus: this.bonus ? this.bonus.toJSON() : null
             }, this.attributes);
         },
 

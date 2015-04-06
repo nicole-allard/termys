@@ -20,7 +20,8 @@ define([
             shippingValue: 0,
             specialAction: $.noop,
             passBonusName: '',
-            coins: 0
+            coins: 0,
+            id: null
         },
 
         addCoin: function () {

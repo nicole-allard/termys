@@ -1,0 +1,5 @@
+:each player in players
+    %div
+        %span= player.name
+        :if player.bonus
+            %div{ class: 'bonus ' + (player.bonus.id.replace(/,|:/g, '-').toLowerCase()) }
