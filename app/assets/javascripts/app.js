@@ -101,6 +101,7 @@ define([
                     app: this,
                     model: this.game
                 }));
+                this.game.play();
             }
         },
 

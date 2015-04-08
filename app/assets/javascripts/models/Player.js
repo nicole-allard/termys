@@ -82,6 +82,39 @@ define([
             FactionShims[faction].call(this);
         },
 
+        // TODO test
+        performIncome: function () {
+            var supply = this.get('supply'),
+                newValues = _.chain(this.get('income'))
+                    .map( function (value, attr) {
+                        // Special handling for adding power
+                        if (attr === 'power')
+                            return [attr, Player.attainPower(this.get('power'), value)];
+
+                        // Check the supply for the attr to attain. (If not specified,
+                        // supply is infinte). Increase the attr by the income value,
+                        // or as many as available in the supply if not enough.
+                        var attrSupply = supply[attr],
+                            increase = value;
+                        if (attrSupply === undefined) {
+                            attrSupply = Infinity;
+                        } else {
+                            // Update supply remaining
+                            increase = Math.min(value, attrSupply);
+                            supply[attr] = attrSupply - increase;
+                        }
+
+                        return [attr, this.get(attr) + increase];
+                    }, this)
+                    .object()
+                    .value();
+
+            // Update the newly computed attr values, and the updated supplies
+            this.set(_.extend({
+                supply: supply
+            }, newValues));
+        },
+
         isRegistered: function () {
             // A player who has signed in on the front end will have a name,
             // but it's not until an associated player model has been created
@@ -208,6 +241,24 @@ define([
                         app: app
                     }
                 );
+        },
+
+        /**
+         * Tries to attain <increase> amount of power. Moves as many as possible
+         * from bowl 1 to bowl 2, and then if that's not enough, moves the rest
+         * from bowl 2 to bowl 3.
+         * @param  {Object} bowls - A mapping from bowl number to contained power
+         * @param  {int} increase - The number of power to attain
+         * @return {Object} - An updated mapping from bowl number to power
+         */
+        attainPower: function (bowls, increase) {
+            var moved, bowl;
+            for (bowl = 1; bowl < 3 && increase; bowl++) {
+                moved = Math.min(increase, bowls[bowl]);
+                bowls[bowl] -= moved;
+                bowls[bowl + 1] += moved;
+                increase -= moved;
+            }
         }
     });
 

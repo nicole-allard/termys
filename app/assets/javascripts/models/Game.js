@@ -79,7 +79,7 @@ define([
         },
 
         activateNextPlayer: function () {
-            this.app.game.set({
+            this.set({
                 activePlayerId: this.activePlayer.nextPlayer().id
             });
         },
@@ -105,6 +105,56 @@ define([
             this.app.player.pass();
         },
 
+        // TODO call this when a round phase changes, or when active player changes
+        play: function () {
+            if (this.get('state') !== 'active')
+                return;
+
+            var phaseBlockingPlayers = this.blockingPlayers.phase,
+                activeRoundIndex = _.findIndex(this.rounds.models, function (round) {
+                    return round.get('phase') < Round.PHASES.COMPLETE;
+                }),
+                activeRound = this.rounds.at(activeRoundIndex);
+
+            // If there's nothing blocking the phase from completing, then
+            // have the active player progress to the next phase.
+            if (phaseBlockingPlayers.length < 1) {
+                if (!this.app.player.isActivePlayer())
+                    return;
+
+                // TODO check if round is the last round, and is past phase 2,
+                // then trigger game end
+
+
+                // Trigger the next phase of the active round. This change will
+                // cause this function to be called again, so no further handling
+                // is required in this call.
+                activeRound.nextPhase();
+                return;
+            }
+
+            if (!phaseBlockingPlayers.contains(this.app.player))
+                return;
+
+            switch (activeRound.get('phase')) {
+                case Round.PHASES.INCOME:
+                    // Players handle income in parallel, kick off income regardless
+                    // of the active player.
+                    this.app.player.performIncome();
+                    break;
+                case Round.PHASES.ACTIONS:
+                    // Only allow the active player to take actions.
+                    if (this.app.player.isActivePlayer())
+                        this.app.player.performAction();
+                    break;
+                case Round.PHASES.CLEANUP:
+                    // Players handle cleanup in parallel, kick off cleanup regardless
+                    // of the active player.
+                    this.app.player.performCleanup();
+                    break;
+            }
+        },
+
         /**
          * Called upon initialization and whenever attributes change.
          * Creates or updates all the properties that are synced from
@@ -123,8 +173,13 @@ define([
             if (this.get('startingPlayerId'))
                 this.updatePlayer('startingPlayer', 'startingPlayerId');
 
-            if (this.get('rounds'))
+            if (this.get('rounds')) {
+                var prevRounds = this.rounds;
                 this.updateCollection('rounds', Round);
+
+                if (!prevRounds && this.rounds)
+                    this.listenTo(this.rounds, 'change:phase', this.play);
+            }
 
             if (this.get('board'))
                 this.updateBoard();

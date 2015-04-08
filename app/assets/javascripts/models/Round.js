@@ -51,9 +51,9 @@ define([
 
         nextPhase: function () {
             var newPhase = this.get('phase') + 1;
-            this.set({ phase: newPhase });
             if (this.phaseHandlers[newPhase])
                 this.phaseHandlers[newPhase].call(this);
+            this.set({ phase: newPhase });
         },
 
         beginIncome: function () {
@@ -77,7 +77,7 @@ define([
         resetPhaseBlocking: function () {
             // Mark all players as blocking the income phase from completing
             var game = this.app.game;
-            game.blockingPlayers.phase.reset(_.pluck(game.players, 'id'));
+            game.blockingPlayers.phase.reset(game.players.models);
         },
 
         serialize: function () {
