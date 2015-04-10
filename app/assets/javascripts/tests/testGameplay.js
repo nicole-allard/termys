@@ -109,16 +109,6 @@ define([
         beforeEach(function () {
             sandbox.stub(window, 'alert');
             sandbox.stub($.prototype, 'modal');
-
-            setCurrentPlayer('Nic');
-
-            stubAjax($.Deferred()
-                .resolve({
-                    game: activeGame,
-                    players: [ nic, ken ]
-                })
-                .promise()
-            );
         });
 
         afterEach(function () {
@@ -136,31 +126,75 @@ define([
             sandbox.restore();
         });
 
-        describe('play', function () {
-            describe('upon app initialization', function () {
+        describe('Beginning a new round', function () {
+            beforeEach(function () {
+                setCurrentPlayer('Nic');
+
+                stubAjax($.Deferred()
+                    .resolve({
+                        game: activeGame,
+                        players: [ nic, ken ]
+                    })
+                    .promise()
+                );
+            });
+
+            describe('play', function () {
                 beforeEach(function () {
                     sandbox.spy(Game.prototype, 'play');
                     sandbox.stub(Player.prototype, 'performIncome');
-                    app = App.init();
                 });
 
-                it('should call game.play', function () {
-                    sinon.assert.called(app.game.play);
+                it('should call game.play when app initializes', function () {
+                    sandbox.stub(Round.prototype, 'nextPhase');
+                    app = App.init();
+
+                    sinon.assert.calledOnce(app.game.play);
                 });
 
                 it('should kick off the first round', function () {
+                    sandbox.spy(Round.prototype, 'nextPhase');
+                    app = App.init();
+
+                    sinon.assert.calledOnce(Round.prototype.nextPhase);
                     expect(app.game.rounds.models[0].attributes.phase).to.equal(Round.PHASES.INCOME);
                 });
 
-                it('should mark all players as blocking phase completion', function () {
-                    expect(app.game.blockingPlayers.phase.length).to.equal(2);
-                    expect(app.game.blockingPlayers.phase.models).to.contain(app.game.players.models[0]);
-                    expect(app.game.blockingPlayers.phase.models).to.contain(app.game.players.models[1]);
+                it('should call game.play after round phase changes', function () {
+                    app = App.init();
+
+                    sinon.assert.calledTwice(app.game.play);
                 });
 
-                it('should kick off performIncome only for the active player', function () {
-                    sinon.assert.calledOnce(app.player.performIncome);
-                    sinon.assert.alwaysCalledOn(app.player.performIncome, app.game.players.models[0]);
+                describe('upon app initialization', function () {
+                    beforeEach(function () {
+                        app = App.init();
+                    });
+
+                    it('should mark all players as blocking phase completion', function () {
+                        expect(app.game.blockingPlayers.phase.length).to.equal(2);
+                        expect(app.game.blockingPlayers.phase.models).to.contain(app.game.players.models[0]);
+                        expect(app.game.blockingPlayers.phase.models).to.contain(app.game.players.models[1]);
+                    });
+
+                    it('should kick off performIncome only for the active player', function () {
+                        sinon.assert.calledOnce(app.player.performIncome);
+                        sinon.assert.alwaysCalledOn(app.player.performIncome, app.game.players.models[0]);
+                    });
+                });
+
+                describe('when the active player removes themself from the blocking players list', function () {
+                    beforeEach(function () {
+                        app = App.init();
+
+                        sandbox.reset();
+
+                        app.game.blockingPlayers.phase.remove(app.player);
+                    });
+
+                    it('should call game.play', function () {
+                        sinon.assert.calledOnce(app.game.play);
+                    });
                 });
             });
         });

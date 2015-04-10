@@ -50,6 +50,7 @@ define([
                 phase: new Backbone.Collection(),
                 action: new Backbone.Collection()
             };
+            this.listenTo(this.blockingPlayers.phase, 'remove', this.play);
 
             // Create default cults, keys, and favor tiles
 
@@ -105,7 +106,16 @@ define([
             this.app.player.pass();
         },
 
-        // TODO call this when a round phase changes, or when active player changes
+        // TODO call this when active player changes
+        /**
+         * The gameplay driver that prompts rounds to update their states, prompts
+         * blocking players to take their appropriate action, and handles end of game.
+         * May have no side effect if called when the active player has completed
+         * their action for this phase and there are other players who have not.
+         *
+         * Called when a round phase changes, when the active player changes, or when
+         * a blocking player is removed.
+         */
         play: function () {
             if (this.get('state') !== 'active')
                 return;

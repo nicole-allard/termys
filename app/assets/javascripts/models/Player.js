@@ -113,6 +113,11 @@ define([
             this.set(_.extend({
                 supply: supply
             }, newValues));
+
+            // Remove this player from the phase blocking players list
+            this.app.game.blockingPlayers.phase.remove(this);
+
+            this.app.game.save();
         },
 
         isRegistered: function () {
