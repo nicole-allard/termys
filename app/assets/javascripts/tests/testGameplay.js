@@ -3,15 +3,10 @@ define([
     'sinon',
     'app',
 
-    'presets/PresetGames',
-    'presets/FactionShims',
     'models/common/UniqueModel',
     'models/Game',
     'models/Player',
-    'models/Bonus',
     'models/Round',
-
-    'views/BonusesView',
 
     'utils/cookies'
 ], function (
@@ -19,15 +14,10 @@ define([
     sinon,
     App,
 
-    PresetGames,
-    FactionShims,
     UniqueModel,
     Game,
     Player,
-    Bonus,
     Round,
-
-    BonusesView,
 
     cookies
 ) {
@@ -120,7 +110,6 @@ define([
             }
 
             UniqueModel.forget(Player);
-            UniqueModel.forget(Bonus);
             UniqueModel.forget(Round);
 
             sandbox.restore();

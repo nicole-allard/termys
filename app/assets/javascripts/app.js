@@ -68,13 +68,13 @@ define([
 
         handleStateChange: function () {
             switch(this.game.get('state')) {
-            case 'joining':
-                this._showView(new JoiningView({
+            case 'config':
+                this._showView(new ConfigurationView({
                     app: this
                 }));
                 return;
-            case 'config':
-                this._showView(new ConfigurationView({
+            case 'joining':
+                this._showView(new JoiningView({
                     app: this
                 }));
                 return;

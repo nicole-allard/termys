@@ -106,6 +106,12 @@ define([
             this.app.player.pass();
         },
 
+        getActiveRound: function () {
+            return _.find(this.rounds.models, function (round) {
+                return round.get('phase') < Round.PHASES.COMPLETE;
+            });
+        },
+
         // TODO call this when active player changes
         /**
          * The gameplay driver that prompts rounds to update their states, prompts
@@ -121,10 +127,7 @@ define([
                 return;
 
             var phaseBlockingPlayers = this.blockingPlayers.phase,
-                activeRoundIndex = _.findIndex(this.rounds.models, function (round) {
-                    return round.get('phase') < Round.PHASES.COMPLETE;
-                }),
-                activeRound = this.rounds.at(activeRoundIndex);
+                activeRound = this.getActiveRound();
 
             // If there's nothing blocking the phase from completing, then
             // have the active player progress to the next phase.
@@ -319,6 +322,7 @@ define([
                     game: this.serialize()
                 }
             }).then(function (response) {
+                self.set({ dirty: false });
                 self.app.poller.parse(response);
             }, function (jqXHR, testStatus, errorThrown) {
                 alert('Could not save your game: ' + errorThrown);

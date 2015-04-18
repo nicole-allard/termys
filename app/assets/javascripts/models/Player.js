@@ -128,6 +128,25 @@ define([
             return !!this.get('id');
         },
 
+        /**
+         * Returns whether or not this player is allowed to make changes to the
+         * game state right now.
+         */
+        canMakeChanges: function () {
+            // The active player can always make changes
+            if (this.isActivePlayer())
+                return true;
+
+            // The only times when all players are able to make changes in parallel are
+            // during the joining phase, and during the active phase if the current round
+            // is in the income or cleanup phase.
+            var gameState = this.app.game.get('state'),
+                activeRound = gameState === 'active' && this.app.game.getActiveRound(),
+                phase = activeRound && activeRound.get('phase');
+
+            return (gameState === 'joining' || _.contains([Round.PHASES.INCOME, Round.PHASES.CLEANUP], phase));
+        },
+
         isActivePlayer: function () {
             return this.app.game && this === this.app.game.activePlayer;
         },
