@@ -3,6 +3,7 @@ define([
     'sinon',
     'app',
 
+    'tests/fixtures',
     'presets/PresetGames',
     'presets/FactionShims',
     'models/common/UniqueModel',
@@ -19,6 +20,7 @@ define([
     sinon,
     App,
 
+    fixtures,
     PresetGames,
     FactionShims,
     UniqueModel,
@@ -51,115 +53,7 @@ define([
             });
         };
 
-        var baseGame = {
-            id: 1,
-            state: 'config',
-            config: null,
-            active_player_id: 10,
-            blocking_players: null,
-            board: null,
-            rounds: null,
-            cults: null,
-            keys: null,
-            favors: null,
-            bonuses: null,
-        },
-        joiningGame = _.defaults({
-            state: 'joining',
-            config: 'preset'
-        }),
-        draftingGame = _.defaults({
-            state: 'drafting',
-            activePlayerId: 10,
-            bonuses: '{"power:shipping:":0,"coins:spade:":0,"coins::":0,"workers::stronghold,sanctuary":0,"workers,power::":0}',
-            rounds: '[{"fire:power":0},{"air:workers":0},{"earth:coins":0},{"water:spades":0},{"fire:workers":0},{"air:spades":0}]'
-        }, joiningGame),
-        dwellingsGame = _.defaults({
-            state: 'dwellings'
-        }, draftingGame),
-        bonusesGame = _.defaults({
-            board: '[[null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,{"structure":{"playerId":10,"type":"dwelling"}},null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},null,null,null,null,null],[null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},{"structure":{"playerId":10,"type":"dwelling"}},null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},null,null,null,null,null,null]]',
-            state: 'bonuses'
-        }, draftingGame),
-
-        basePlayer = {
-            game_id: 1,
-            faction: null,
-            turn_position: null,
-            victory_points: null,
-            coins: null,
-            power: null,
-            workers: null,
-            priests: null,
-            num_keys: null,
-            supply: null,
-            shipping_value: null,
-            land_skipping_value: null,
-            income: null,
-            bonus: null
-        },
-        baseNic = _.defaults({
-            id: 10,
-            name: 'Nic'
-        }, basePlayer),
-        baseKen = _.defaults({
-            id: 11,
-            name: 'Ken'
-        }, basePlayer),
-        joinedNic = {
-            id: 10,
-            name: 'Nic',
-            bonus: null,
-            coins: 0,
-            faction: '',
-            income: '{"power":0,"coins":0,"workers":1,"priests":0}',
-            landSkippingValue: 0,
-            numKeys: 0,
-            power: '{"1":0,"2":0,"3":0}',
-            priests: 0,
-            shippingValue: 0,
-            supply: '{"priests":7,"dwellings":10,"tradingHouses":4,"temples":3,"strongholds":1,"sanctuaries":1,"bridges":3}',
-            turnPosition: -1,
-            victoryPoints: 20,
-            workers: 0
-        },
-        joinedKen = {
-            id: 11,
-            name: 'Ken',
-            bonus: null,
-            coins: 0,
-            faction: '',
-            income: '{"power":0,"coins":0,"workers":1,"priests":0}',
-            landSkippingValue: 0,
-            numKeys: 0,
-            power: '{"1":0,"2":0,"3":0}',
-            priests: 0,
-            shippingValue: 0,
-            supply: '{"priests":7,"dwellings":10,"tradingHouses":4,"temples":3,"strongholds":1,"sanctuaries":1,"bridges":3}',
-            turnPosition: -1,
-            victoryPoints: 20,
-            workers: 0
-        },
-        orderedNic = _.defaults({
-            turn_position: 0
-        }, joinedNic),
-        orderedKen = _.defaults({
-            turn_position: 1
-        }, joinedKen),
-        factionedNic = _.defaults({
-            faction: 'witches'
-        }, orderedNic),
-        factionedKen = _.defaults({
-            faction: 'nomads'
-        }, orderedKen),
-        bonusedNic = _.defaults({
-            bonus: 'power:shipping:'
-        }, factionedNic),
-        bonusedKen = _.defaults({
-            bonus: 'coins:spade:',
-        }, factionedKen),
-
-        sandbox, app;
+        var sandbox, app;
 
         before(function () {
             sandbox = sinon.sandbox.create();
@@ -212,7 +106,7 @@ define([
                 var ajaxArgs = $.ajax.firstCall.args;
                 expect(ajaxArgs.length).to.equal(1);
                 sinon.assert.match(ajaxArgs[0].url, 'get_or_create_game');
-                expect(ajaxArgs[0].data.player).to.eql(_.omit(joinedNic, 'id'));
+                expect(ajaxArgs[0].data.player).to.eql(_.omit(fixtures.joinedNic, 'id'));
             });
         });
 
@@ -225,8 +119,8 @@ define([
                 beforeEach(function () {
                     stubAjax($.Deferred()
                         .resolve({
-                            game: baseGame,
-                            players: [ joinedNic ]
+                            game: fixtures.baseGame,
+                            players: [ fixtures.joinedNic ]
                         })
                         .promise()
                     );
@@ -287,8 +181,8 @@ define([
                 beforeEach(function () {
                     stubAjax($.Deferred()
                         .resolve({
-                            game: joiningGame,
-                            players: [ joinedNic ]
+                            game: fixtures.joiningGame,
+                            players: [ fixtures.joinedNic ]
                         })
                         .promise()
                     );
@@ -301,7 +195,7 @@ define([
                     var initialPlayer = app.game.players.models[0];
                     // Compare primitive attributes directly, and then more deeply compare
                     // values that are parsed into objects
-                    expect(initialPlayer.attributes).to.contain(_.omit(joinedNic, ['income', 'power', 'supply', 'bonus']));
+                    expect(initialPlayer.attributes).to.contain(_.omit(fixtures.joinedNic, ['income', 'power', 'supply', 'bonus']));
                     expect(initialPlayer.attributes.income).to.eql({
                         power: 0,
                         coins: 0,
@@ -328,10 +222,10 @@ define([
                 it('should properly parse the joined players', function () {
                     stubAjax($.Deferred()
                         .resolve({
-                            game: joiningGame,
+                            game: fixtures.joiningGame,
                             players: [
-                                joinedNic,
-                                joinedKen
+                                fixtures.joinedNic,
+                                fixtures.joinedKen
                             ]
                         })
                         .promise()
@@ -341,7 +235,7 @@ define([
 
                     expect(app.game.players.length).to.equal(2);
                     var joinedPlayer = app.game.players.models[1];
-                    expect(joinedPlayer.attributes).to.contain(_.omit(joinedKen, ['income', 'power', 'supply', 'bonus']));
+                    expect(joinedPlayer.attributes).to.contain(_.omit(fixtures.joinedKen, ['income', 'power', 'supply', 'bonus']));
                     expect(joinedPlayer.attributes.income).to.eql({
                         power: 0,
                         coins: 0,
@@ -394,7 +288,7 @@ define([
                     var ajaxArgs = $.ajax.secondCall.args;
                     expect(ajaxArgs.length).to.equal(1);
                     expect(ajaxArgs[0].url).to.match(/join_game/);
-                    expect(ajaxArgs[0].data.player).to.eql(_.omit(joinedKen, 'id'));
+                    expect(ajaxArgs[0].data.player).to.eql(_.omit(fixtures.joinedKen, 'id'));
                 });
 
                 it('should not allow a player who has not yet joined to start the game', function () {
@@ -419,10 +313,10 @@ define([
                     beforeEach(function () {
                         stubAjax($.Deferred()
                             .resolve({
-                                game: joiningGame,
+                                game: fixtures.joiningGame,
                                 players: [
-                                    joinedNic,
-                                    joinedKen
+                                    fixtures.joinedNic,
+                                    fixtures.joinedKen
                                 ]
                             })
                             .promise()
@@ -547,10 +441,10 @@ define([
                 beforeEach(function () {
                     stubAjax($.Deferred()
                         .resolve({
-                            game: draftingGame,
+                            game: fixtures.draftingGame,
                             players: [
-                                orderedNic,
-                                orderedKen
+                                fixtures.orderedNic,
+                                fixtures.orderedKen
                             ]
                         })
                         .promise()
@@ -739,16 +633,15 @@ define([
 
                 stubAjax($.Deferred()
                     .resolve({
-                        game: dwellingsGame,
+                        game: fixtures.dwellingsGame,
                         players: [
-                            factionedNic,
-                            factionedKen
+                            fixtures.factionedNic,
+                            fixtures.factionedKen
                         ]
                     })
                     .promise()
                 );
             });
-
 
             it('should initialize tha players from the fetch', function () {
                 // Don't let the game save, not releveant for this particular test
@@ -809,10 +702,10 @@ define([
 
                 stubAjax($.Deferred()
                     .resolve({
-                        game: bonusesGame,
+                        game: fixtures.bonusesGame,
                         players: [
-                            factionedNic,
-                            factionedKen
+                            fixtures.factionedNic,
+                            fixtures.factionedKen
                         ]
                     })
                     .promise()
@@ -944,10 +837,10 @@ define([
 
                 stubAjax($.Deferred()
                     .resolve({
-                        game: bonusesGame,
+                        game: fixtures.bonusesGame,
                         players: [
-                            bonusedNic,
-                            factionedKen
+                            fixtures.bonusedNic,
+                            fixtures.factionedKen
                         ]
                     })
                     .promise()
@@ -964,6 +857,41 @@ define([
                 app.modalView.contentView.trigger('itemview:select:bonus', bonusView);
 
                 expect(app.game.attributes.state).to.equal('active');
+            });
+        });
+
+        describe('when the game is in active mode', function () {
+            beforeEach(function () {
+                setCurrentPlayer('Nic');
+
+                stubAjax($.Deferred()
+                    .resolve({
+                        game: fixtures.bonusesGame,
+                        players: [
+                            fixtures.bonusedNic,
+                            fixtures.bonusedKen
+                        ]
+                    })
+                    .promise()
+                );
+            });
+
+            it('should initialize tha players from the fetch', function () {
+                // Don't let the game save, not releveant for this particular test
+                sandbox.stub(Game.prototype, 'save');
+
+                app = App.init();
+
+                sinon.assert.calledOnce($.ajax);
+                expect($.ajax.firstCall.args[0].url).to.match(/get_or_create_game/);
+
+                expect(app.game.players.length).to.equal(2);
+
+                expect(app.game.players.models[0].attributes).to.contain({ id: 10, name: 'Nic', turnPosition: 0, faction: 'witches' });
+                expect(app.game.players.models[0].bonus).to.equal(Bonus.expand({ key: 'power:shipping:', value: 0 }));
+
+                expect(app.game.players.models[1].attributes).to.contain({ id: 11, name: 'Ken', turnPosition: 1, faction: 'nomads' });
+                expect(app.game.players.models[1].bonus).to.equal(Bonus.expand({ key: 'coins:spade:', value: 0 }));
             });
         });
     });
