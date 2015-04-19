@@ -162,13 +162,12 @@ define([
 
         deserialize: function () {
             var bonus = this.get('bonus');
+            // Only clear out the bonus if specifically set to null. If undefined,
+            // it could just mean that it wasn't changed.
             if (bonus === null)
                 this.bonus = null;
-            else if (_.isString(bonus))
-                bonus = JSON.parse(bonus);
-
-            if (_.isObject(bonus))
-                this.bonus = Bonus.expand({ app: this.app, key: _.keys(bonus)[0], value: _.values(bonus)[1] });
+            else if (bonus)
+                this.bonus = Bonus.expand({ app: this.app, key: bonus });
 
             this.unset('bonus');
             this.trigger('changeProperty:bonus');
@@ -221,12 +220,10 @@ define([
             }, this.attributes);
         },
 
-        // TODO determine why income is nil in the DB. Should be
-        // the serialized version of the FE default value.
         serialize: function () {
             return _.extend(
                 {
-                    bonus: this.bonus && JSON.stringify(this.bonus.serialize()) || null
+                    bonus: this.bonus && JSON.stringify(this.bonus.id) || null
                 },
                 _.chain(this.attributes)
                 .map(function (value, key) {

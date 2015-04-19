@@ -44,12 +44,35 @@ define([
                 .withArgs(Player.USER_COOKIE)
                 .returns(name);
         };
-        var stubAjax = function (response) {
+
+        /**
+         * Stubs the ajax function. Takes in an object where the keys are
+         * regex strings to match against the url passed to ajax, and the
+         * response is what to return for that url. If an unmatched url
+         * is called, an unresolved promise will be returned.
+         */
+        var stubAjax = function (responseByUrl) {
             if ($.ajax.restore && $.ajax.restore.sinon)
                 $.ajax.restore();
 
-            sandbox.stub($, 'ajax', function () {
-                return response;
+            sandbox.stub($, 'ajax', function (options) {
+                var response = _.find(responseByUrl, function (response, urlRegex) {
+                    return options.url.match(urlRegex);
+                });
+                if (response)
+                    return response;
+
+                return $.Deferred().promise();
+            });
+        };
+
+        /**
+         * A shorthand for stubAjax that takes in just the response to be
+         * returned for any get call (get or create, or get latest)
+         */
+        var stubGetGame = function (response) {
+            stubAjax({
+                'get_or_create_game|get_latest': response
             });
         };
 
@@ -80,12 +103,9 @@ define([
         });
 
         describe('before player has authenticated', function () {
-            before(function () {
-                setCurrentPlayer(null);
-            });
-
             beforeEach(function () {
-                stubAjax($.Deferred().promise());
+                setCurrentPlayer(null);
+                stubGetGame($.Deferred().promise());
             });
 
             it('should not ping the server until the user authenticates', function () {
@@ -96,6 +116,8 @@ define([
 
             it('should ping the server once the user authenticates', function () {
                 app = App.init();
+
+                sinon.assert.notCalled($.ajax);
 
                 expect(app.player).is.ok;
                 expect(app.player.attributes.username).is.undefined;
@@ -117,7 +139,7 @@ define([
 
             describe('when there\'s no current game', function () {
                 beforeEach(function () {
-                    stubAjax($.Deferred()
+                    stubGetGame($.Deferred()
                         .resolve({
                             game: fixtures.baseGame,
                             players: [ fixtures.joinedNic ]
@@ -179,7 +201,7 @@ define([
 
             describe('when the game is in joining mode', function () {
                 beforeEach(function () {
-                    stubAjax($.Deferred()
+                    stubGetGame($.Deferred()
                         .resolve({
                             game: fixtures.joiningGame,
                             players: [ fixtures.joinedNic ]
@@ -220,7 +242,7 @@ define([
                 });
 
                 it('should properly parse the joined players', function () {
-                    stubAjax($.Deferred()
+                    stubGetGame($.Deferred()
                         .resolve({
                             game: fixtures.joiningGame,
                             players: [
@@ -311,7 +333,7 @@ define([
 
                 describe('a user starts the game in preset config', function () {
                     beforeEach(function () {
-                        stubAjax($.Deferred()
+                        stubGetGame($.Deferred()
                             .resolve({
                                 game: fixtures.joiningGame,
                                 players: [
@@ -439,7 +461,7 @@ define([
 
             describe('when the game is in drafting mode', function () {
                 beforeEach(function () {
-                    stubAjax($.Deferred()
+                    stubGetGame($.Deferred()
                         .resolve({
                             game: fixtures.draftingGame,
                             players: [
@@ -561,10 +583,6 @@ define([
                 it('should update the game and players once the active player has chosen a faction', function () {
                     app = App.init();
 
-                    // Stub game save, otherwise the response will be parsed and overwrite the values set
-                    // before the save
-                    sandbox.stub(app.game, 'save');
-
                     app.currentView.chooseFaction({ currentTarget: $('<button>').val('witches') });
 
                     // Should update the active player's faction
@@ -576,10 +594,6 @@ define([
 
                 it('should apply the faction shim when the player chooses a faction', function () {
                     app = App.init();
-
-                    // Stub game save, otherwise the response will be parsed and overwrite the values set
-                    // before the save
-                    sandbox.stub(app.game, 'save');
 
                     sinon.spy(FactionShims, 'chaos');
 
@@ -608,10 +622,6 @@ define([
 
                     app = App.init();
 
-                    // Stub game save, otherwise the response will be parsed and overwrite the values set
-                    // before the save
-                    sandbox.stub(app.game, 'save');
-
                     app.game.players.models[0].set({ faction: 'witches' });
                     app.game.set({ activePlayerId: 11 });
 
@@ -631,7 +641,7 @@ define([
             beforeEach(function () {
                 setCurrentPlayer('Nic');
 
-                stubAjax($.Deferred()
+                stubGetGame($.Deferred()
                     .resolve({
                         game: fixtures.dwellingsGame,
                         players: [
@@ -643,13 +653,10 @@ define([
                 );
             });
 
-            it('should initialize tha players from the fetch', function () {
-                // Don't let the game save, not releveant for this particular test
-                sandbox.stub(Game.prototype, 'save');
-
+            it('should initialize the players from the fetch', function () {
                 app = App.init();
 
-                sinon.assert.calledOnce($.ajax);
+                sinon.assert.calledTwice($.ajax);
                 expect($.ajax.firstCall.args[0].url).to.match(/get_or_create_game/);
 
                 expect(app.game.players.length).to.equal(2);
@@ -700,7 +707,7 @@ define([
             beforeEach(function () {
                 setCurrentPlayer('Nic');
 
-                stubAjax($.Deferred()
+                stubGetGame($.Deferred()
                     .resolve({
                         game: fixtures.bonusesGame,
                         players: [
@@ -759,10 +766,6 @@ define([
 
                 var prevPlayerAttrs = _.clone(app.player.attributes);
 
-                // Stub game save, otherwise the response will be parsed and overwrite the values set
-                // before the save
-                sandbox.stub(app.game, 'save');
-
                 // Trigger taking the bonus
                 app.modalView.contentView.trigger('itemview:select:bonus', bonusView);
 
@@ -786,10 +789,6 @@ define([
 
                 expect(app.game.bonuses.length).to.equal(5);
                 expect(app.game.bonuses.findWhere({ id: bonusView.model.id })).to.be.ok;
-
-                // Stub game save, otherwise the response will be parsed and overwrite the values set
-                // before the save
-                sandbox.stub(app.game, 'save');
 
                 // Trigger taking the bonus
                 app.modalView.contentView.trigger('itemview:select:bonus', bonusView);
@@ -829,13 +828,13 @@ define([
                 var playerBonus = ajaxArgs.data.game.players[0].bonus;
                 expect(playerBonus).is.a('string');
                 playerBonus = JSON.parse(playerBonus);
-                expect(playerBonus).to.eql({ 'power:shipping:':0 });
+                expect(playerBonus).to.equal('power:shipping:');
             });
 
             it('should update the game state to active after the last player chooses a bonus', function () {
                 setCurrentPlayer('Ken');
 
-                stubAjax($.Deferred()
+                stubGetGame($.Deferred()
                     .resolve({
                         game: fixtures.bonusesGame,
                         players: [
@@ -849,10 +848,6 @@ define([
                 app = App.init();
                 app.game.set({ activePlayerId: 11 });
 
-                // Stub game save, otherwise the response will be parsed and overwrite the values set
-                // before the save
-                sandbox.stub(app.game, 'save');
-
                 // Trigger taking the bonus
                 app.modalView.contentView.trigger('itemview:select:bonus', bonusView);
 
@@ -864,7 +859,7 @@ define([
             beforeEach(function () {
                 setCurrentPlayer('Nic');
 
-                stubAjax($.Deferred()
+                stubGetGame($.Deferred()
                     .resolve({
                         game: fixtures.bonusesGame,
                         players: [
@@ -877,9 +872,6 @@ define([
             });
 
             it('should initialize tha players from the fetch', function () {
-                // Don't let the game save, not releveant for this particular test
-                sandbox.stub(Game.prototype, 'save');
-
                 app = App.init();
 
                 sinon.assert.calledOnce($.ajax);

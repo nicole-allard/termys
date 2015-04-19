@@ -45,7 +45,7 @@ define([
                 income: newIncome,
                 shippingValue: player.get('shippingValue') + this.get('shippingValue'),
                 coins: player.get('coins') + this.get('coins'),
-                bonus: this.serialize()
+                bonus: this.id
             });
 
             // Create a function bound to the given player and execute
