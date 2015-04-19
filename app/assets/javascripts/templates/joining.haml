@@ -4,9 +4,14 @@ Current Players:
         :if player.id === currentPlayer.id
             (you)
 
+<br/>
+
 :if currentPlayerIsRegistered
-    %button.js-start-game
-        Start Game with #{players.length} player(s)
+    :if currentPlayer.isActivePlayer
+        %button.js-start-game
+            Start Game with #{players.length} player(s)
+    :else
+        Joined. Please Wait.
 :if !currentPlayerIsRegistered
     %button.js-join-game
         Join Game as #{currentPlayer.name}
