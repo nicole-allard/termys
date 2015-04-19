@@ -223,7 +223,7 @@ define([
         serialize: function () {
             return _.extend(
                 {
-                    bonus: this.bonus && JSON.stringify(this.bonus.id) || null
+                    bonus: this.bonus && this.bonus.id || null
                 },
                 _.chain(this.attributes)
                 .map(function (value, key) {

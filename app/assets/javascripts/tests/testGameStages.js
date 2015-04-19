@@ -827,7 +827,6 @@ define([
 
                 var playerBonus = ajaxArgs.data.game.players[0].bonus;
                 expect(playerBonus).is.a('string');
-                playerBonus = JSON.parse(playerBonus);
                 expect(playerBonus).to.equal('power:shipping:');
             });
 
