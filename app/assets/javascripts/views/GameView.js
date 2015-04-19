@@ -6,6 +6,7 @@ define([
     'views/ModalView',
     'views/BonusesView',
     'views/BonusSelectionView',
+    'views/ActionSelectionView',
 
     'text!templates/game.haml'
 ], function (
@@ -16,6 +17,7 @@ define([
     ModalView,
     BonusesView,
     BonusSelectionView,
+    ActionSelectionView,
 
     gameTemplate
 ) {
@@ -39,7 +41,8 @@ define([
 
         bindHandlers: function () {
             this.model.players.each(function (player) {
-                this.listenTo(player, 'choose:bonus', _.bind(this.showBonuses, this, player));
+                this.listenTo(player, 'choose:bonus', this.showBonuses);
+                this.listenTo(player, 'choose:action', this.showActions);
             }, this);
         },
 
@@ -55,7 +58,7 @@ define([
             }));
         },
 
-        showBonuses: function (player) {
+        showBonuses: function () {
             // Open a modal, fill it with the bonuses view.
             // listen to a pick event, close the modal
             var bonusesView = new BonusSelectionView({
@@ -70,26 +73,21 @@ define([
                 app: this.app
             });
 
-            this.listenTo(bonusesView, 'itemview:select:bonus', function (bonusView) {
-                if (!this.app.player.isActivePlayer())
-                    return;
+            modal.openModal();
+        },
 
-                var bonus = bonusView.model;
-                bonus.take(this.app.player);
-
-                if (this.app.game.players.every(function (player) {
-                    return !!player.bonus;
-                })) {
-                    this.app.game.set({
-                        state: 'active'
-                    });
-                    modal.closeModal();
-                }
-
-                this.app.game.activateNextPlayer();
-                this.app.game.save();
+        showActions: function () {
+            var actionsView = new ActionSelectionView({
+                model: this.model,
+                collection: this.app.actions,
+                app: this.app
             });
 
+            var modal = new ModalView({
+                id: 'actions',
+                contentView: actionsView,
+                app: this.app
+            });
 
             modal.openModal();
         }

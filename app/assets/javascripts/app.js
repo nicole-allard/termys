@@ -5,6 +5,7 @@ define([
 
     'models/Poller',
     'models/Player',
+    'models/Action',
 
     'views/LoginView',
     'views/JoiningView',
@@ -21,6 +22,7 @@ define([
 
     Poller,
     Player,
+    Action,
 
     LoginView,
     JoiningView,
@@ -33,6 +35,7 @@ define([
 
         initialize: function () {
             $.when(this.initUser()).then(_.bind(function () {
+                this.initActions();
                 this.poller = new Poller({}, { app: this });
                 this.poller.start();
             }, this));
@@ -54,6 +57,10 @@ define([
             }));
 
             return usernamePromise.promise();
+        },
+
+        initActions: function () {
+            this.actions = Action.buildActionsCollection();
         },
 
         setGame: function (game) {

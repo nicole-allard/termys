@@ -82,44 +82,6 @@ define([
             FactionShims[faction].call(this);
         },
 
-        // TODO test
-        performIncome: function () {
-            var supply = this.get('supply'),
-                newValues = _.chain(this.get('income'))
-                    .map( function (value, attr) {
-                        // Special handling for adding power
-                        if (attr === 'power')
-                            return [attr, Player.attainPower(this.get('power'), value)];
-
-                        // Check the supply for the attr to attain. (If not specified,
-                        // supply is infinte). Increase the attr by the income value,
-                        // or as many as available in the supply if not enough.
-                        var attrSupply = supply[attr],
-                            increase = value;
-                        if (attrSupply === undefined) {
-                            attrSupply = Infinity;
-                        } else {
-                            // Update supply remaining
-                            increase = Math.min(value, attrSupply);
-                            supply[attr] = attrSupply - increase;
-                        }
-
-                        return [attr, this.get(attr) + increase];
-                    }, this)
-                    .object()
-                    .value();
-
-            // Update the newly computed attr values, and the updated supplies
-            this.set(_.extend({
-                supply: supply
-            }, newValues));
-
-            // Remove this player from the phase blocking players list
-            this.app.game.blockingPlayers.phase.remove(this);
-
-            this.app.game.save();
-        },
-
         isRegistered: function () {
             // A player who has signed in on the front end will have a name,
             // but it's not until an associated player model has been created
