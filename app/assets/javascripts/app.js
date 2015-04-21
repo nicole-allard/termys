@@ -67,8 +67,13 @@ define([
             this.game = game;
             this.trigger('change:game', game);
 
-            this.listenTo(game, 'changeProperty:activePlayer', this.handleStateChange);
-            this.listenTo(game, 'change:state', this.handleStateChange);
+            // Allow changes to complete before moving on to handling the next state,
+            // otherwise the change of the game state could cause more game changes
+            // which won't trigger 'change' events as they should, because the state
+            // change hasn't completed yet.
+            var deferredHandleStateChange = _.bind(_.defer, _, _.bind(this.handleStateChange, this));
+            this.listenTo(game, 'changeProperty:activePlayer', deferredHandleStateChange);
+            this.listenTo(game, 'change:state', deferredHandleStateChange);
 
             this.handleStateChange();
         },

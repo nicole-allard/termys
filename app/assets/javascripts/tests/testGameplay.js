@@ -161,9 +161,9 @@ define([
                     });
 
                     it('should mark all players as blocking phase completion', function () {
-                        expect(app.game.blockingPlayers.phase.length).to.equal(2);
-                        expect(app.game.blockingPlayers.phase.models).to.contain(app.game.players.models[0]);
-                        expect(app.game.blockingPlayers.phase.models).to.contain(app.game.players.models[1]);
+                        expect(app.game.blockingPlayers.length).to.equal(2);
+                        expect(app.game.blockingPlayers.models).to.contain(app.game.players.models[0]);
+                        expect(app.game.blockingPlayers.models).to.contain(app.game.players.models[1]);
                     });
 
                     it('should kick off performIncome only for the active player', function () {
@@ -178,7 +178,7 @@ define([
 
                         sandbox.reset();
 
-                        app.game.blockingPlayers.phase.remove(app.player);
+                        app.game.blockingPlayers.remove(app.player);
                     });
 
                     it('should call game.play', function () {

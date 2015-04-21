@@ -77,7 +77,9 @@ define([
         resetPhaseBlocking: function () {
             // Mark all players as blocking the income phase from completing
             var game = this.app.game;
-            game.blockingPlayers.phase.reset(game.players.models);
+            game.set({
+                blockingPlayers: game.players.pluck('id')
+            });
         },
 
         serialize: function () {

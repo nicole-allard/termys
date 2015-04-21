@@ -38,8 +38,8 @@ define([
                 supply: supply
             }, newValues));
 
-            // Remove this player from the phase blocking players list
-            this.app.game.blockingPlayers.phase.remove(this);
+            // Remove this player from the blocking players list
+            this.app.game.blockingPlayers.remove(this);
 
             this.app.game.save();
         },
@@ -49,6 +49,23 @@ define([
         },
         
         pass: function () {
+            // if the game is in active mode, and this is the first
+            // player to pass (all players are blocking the phase
+            // from completing), set this player as the next
+            // starting player.
+            // (pass is also called during game setup to choose initial
+            // bonuses, so it's necessary to check that the game is in
+            // active mode)
+            if (this.app.game.get('state') === 'active') {
+                // TODO
+            }
+
+            // remove player from blocking players list once player
+            // chooses their bonus
+            this.listenTo(this, 'changeProperty:bonus', function () {
+                this.app.game.blockingPlayers.remove(this);
+            });
+
             // show the modal to choose a bonus
             // one a bonus is chosen, return the player's bonus
             // the the game's list (if any) and assign the chosen

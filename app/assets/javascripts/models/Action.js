@@ -16,10 +16,10 @@ define([
             if (!this.app.player.isActivePlayer())
                 return;
 
-            // TODO set function names below, add functions to actions mixin
-            // this.app.player[playerFunctionName]();
+            this.app.player[this.get('handlerName')]();
         }
     }, {
+        // TODO set function names below, add functions to actions mixin
         buildActionsCollection: function () {
             return new Backbone.Collection(_.each([
                 {
@@ -44,7 +44,8 @@ define([
                     name: 'Special Action'
                 },
                 {
-                    name: 'Pass'
+                    name: 'Pass',
+                    handlerName: 'pass'
                 }
             ], function (attrs) {
                 return new Action(attrs);

@@ -23,7 +23,7 @@ define([
         // properties: {
         //     activePlayer: Player,
         //     startingPlayer: Player,
-        //     blockingPlayers: { blocked: Collection(Player)}
+        //     blockingPlayers: Collection(Player)
         //     players: Collection(Player),
         //     rounds: Collection(Round),
         //     board: Board,
@@ -46,11 +46,8 @@ define([
 
             // Object is created on the frontend before being populated
             // by the backend
-            this.blockingPlayers = {
-                phase: new Backbone.Collection(),
-                action: new Backbone.Collection()
-            };
-            this.listenTo(this.blockingPlayers.phase, 'remove', this.play);
+            this.blockingPlayers = new Backbone.Collection();
+            this.listenTo(this.blockingPlayers, 'remove', this.play);
 
             // Create default cults, keys, and favor tiles
 
@@ -92,6 +89,7 @@ define([
             PresetGames.players[this.players.length].createBoard(this);
             this.set({
                 state: 'bonuses',
+                blockingPlayers: this.players.pluck('id'),
                 activePlayerId: this.players.first().id
             });
 
@@ -126,12 +124,11 @@ define([
             if (this.get('state') !== 'active')
                 return;
 
-            var phaseBlockingPlayers = this.blockingPlayers.phase,
-                activeRound = this.getActiveRound();
+            var activeRound = this.getActiveRound();
 
             // If there's nothing blocking the phase from completing, then
             // have the active player progress to the next phase.
-            if (phaseBlockingPlayers.length < 1) {
+            if (this.blockingPlayers.length < 1) {
                 if (!this.app.player.isActivePlayer())
                     return;
 
@@ -146,7 +143,7 @@ define([
                 return;
             }
 
-            if (!phaseBlockingPlayers.contains(this.app.player))
+            if (!this.blockingPlayers.contains(this.app.player))
                 return;
 
             switch (activeRound.get('phase')) {
@@ -207,11 +204,13 @@ define([
                 }
             }
 
+            if (this.get('blockingPlayers'))
+                this.updateCollection('blockingPlayers', Player);
+
             // TODO turn the following attrs into properties:
             // cults
             // keys
             // favorTiles
-            // blockingPlayers
         },
 
         /**
@@ -255,7 +254,7 @@ define([
                 // collection.
                 collection.add(Model.expand ?
                     Model.expand({ app: app, value: value, key: key }) :
-                    new UniqueModel(Model, value, { app: app }));
+                    new UniqueModel(Model, _.isObject(value) ? value : { id: value }, { app: app }));
             });
 
             this.unset(attrName, { silent: true });
@@ -309,7 +308,8 @@ define([
                 startingPlayerId: this.startingPlayer ? this.startingPlayer.id : null,
                 rounds: this.rounds ? JSON.stringify(this.rounds.invoke('serialize')) : null,
                 board: JSON.stringify(this.board.serialize()),
-                bonuses: this.bonuses ? JSON.stringify(_.extend.apply(_, this.bonuses.invoke('serialize'))) : null
+                bonuses: this.bonuses ? JSON.stringify(_.extend.apply(_, this.bonuses.invoke('serialize'))) : null,
+                blockingPlayers: this.blockingPlayers.length ? JSON.stringify(this.blockingPlayers.pluck('id')) : null
             }, _.pick(this.attributes, _.keys(this.defaults)));
         },
 

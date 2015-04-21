@@ -690,13 +690,25 @@ define([
                     expect(app.game.attributes).to.contain({ state: 'bonuses' });
                 });
 
+                it('should mark all players as blocking the bonuses stage from completing', function () {
+                    app = App.init();
+
+                    expect(app.game.blockingPlayers).to.be.ok;
+                    expect(app.game.blockingPlayers.length).to.equal(2);
+                    expect(app.game.blockingPlayers.models[0].attributes).to.contain({ id: 10, name: 'Nic' });
+                    expect(app.game.blockingPlayers.models[1].attributes).to.contain({ id: 11, name: 'Ken' });
+                });
+
                 it('should save the game and the dwellings', function () {
                     app = App.init();
 
                     sinon.assert.calledTwice($.ajax);
                     var ajaxArgs = $.ajax.secondCall.args[0];
                     expect(ajaxArgs.url).to.match(/update_game/);
-                    expect(ajaxArgs.data.game).to.contain({ board: '[[null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,{"structure":{"playerId":10,"type":"dwelling"}},null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},null,null,null,null,null],[null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},{"structure":{"playerId":10,"type":"dwelling"}},null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},null,null,null,null,null,null]]' });
+                    expect(ajaxArgs.data.game).to.contain({
+                        board: '[[null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,{"structure":{"playerId":10,"type":"dwelling"}},null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},null,null,null,null,null],[null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},{"structure":{"playerId":10,"type":"dwelling"}},null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},null,null,null,null,null,null]]',
+                        blockingPlayers: '[10,11]'
+                     });
                 });
             });
         });
@@ -782,6 +794,21 @@ define([
                         prevPlayerAttrs.income)
                     }, prevPlayerAttrs)
                 );
+            });
+
+            it('should remove the active player from the blocking list when they select a bonus', function () {
+                app = App.init();
+
+                expect(app.game.blockingPlayers).to.be.ok;
+                expect(app.game.blockingPlayers.length).to.equal(2);
+                expect(app.game.blockingPlayers.models[0].attributes).to.contain({ id: 10, name: 'Nic' });
+                expect(app.game.blockingPlayers.models[1].attributes).to.contain({ id: 11, name: 'Ken' });
+
+                // Trigger taking the bonus
+                app.modalView.contentView.trigger('itemview:select:bonus', bonusView);
+
+                expect(app.game.blockingPlayers.length).to.equal(1);
+                expect(app.game.blockingPlayers.models[0].attributes).to.contain({ id: 11, name: 'Ken' });
             });
 
             it('should remove the chosen bonus from the game\'s bonuses once a player takes one' , function () {

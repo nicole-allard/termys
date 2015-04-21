@@ -22,7 +22,7 @@ define([
     }),
     draftingGame = _.defaults({
         state: 'drafting',
-        activePlayerId: 10,
+        active_player_id: 10,
         bonuses: '{"power:shipping:":0,"coins:spade:":0,"coins::":0,"workers::stronghold,sanctuary":0,"workers,power::":0}',
         rounds: '[{"fire:power":0},{"air:workers":0},{"earth:coins":0},{"water:spades":0},{"fire:workers":0},{"air:spades":0}]'
     }, joiningGame),
@@ -31,7 +31,8 @@ define([
     }, draftingGame),
     bonusesGame = _.defaults({
         board: '[[null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,{"structure":{"playerId":10,"type":"dwelling"}},null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},null,null,null,null,null],[null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},{"structure":{"playerId":10,"type":"dwelling"}},null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,{"structure":{"playerId":11,"type":"dwelling"}},null,null,null,null,null,null]]',
-        state: 'bonuses'
+        state: 'bonuses',
+        blocking_players: '[10,11]'
     }, draftingGame),
     activeGame = _.defaults({
         state: 'active',

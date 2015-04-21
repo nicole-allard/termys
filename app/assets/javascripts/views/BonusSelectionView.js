@@ -28,6 +28,9 @@ define([
             var bonus = bonusView.model;
             bonus.take(this.app.player);
 
+            // TODO NO! Don't do this here, should use player blocking list to
+            // change the game state.
+            // This should jsut remove the player from the blocking list.
             if (this.app.game.players.every(function (player) {
                 return !!player.bonus;
             })) {
