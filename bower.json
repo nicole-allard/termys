@@ -11,7 +11,6 @@
     },
     "devDependencies": {
         "mocha": "*",
-        "chai": "*",
-        "sinon": "*"
+        "chai": "*"
     }
 }

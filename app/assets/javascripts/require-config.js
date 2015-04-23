@@ -3,7 +3,7 @@ require.config({
     paths: {
         'bootstrap': 'vendor/bootstrap.min',
         'haml': 'vendor/haml',
-        'sinon': 'sinon/lib/sinon'
+        'sinon': 'sinon-1.14.1'
     },
     shim: {
         'jquery': {

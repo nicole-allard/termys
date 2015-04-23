@@ -76,7 +76,7 @@ define([
             });
         };
 
-        var sandbox, app;
+        var sandbox, app, clock;
 
         before(function () {
             sandbox = sinon.sandbox.create();
@@ -85,6 +85,7 @@ define([
         beforeEach(function () {
             sandbox.stub(window, 'alert');
             sandbox.stub($.prototype, 'modal');
+            clock = sinon.useFakeTimers();
         });
 
         afterEach(function () {
@@ -100,6 +101,7 @@ define([
             UniqueModel.forget(Round);
 
             sandbox.restore();
+            clock.restore();
         });
 
         describe('before player has authenticated', function () {
@@ -833,6 +835,9 @@ define([
 
                 // Trigger taking the bonus
                 app.modalView.contentView.trigger('itemview:select:bonus', bonusView);
+
+                // Save calls are deferred, allow the callstack to clear before checking for save
+                clock.tick(1);
 
                 sinon.assert.calledOnce($.ajax);
                 var ajaxArgs = $.ajax.firstCall.args[0];
