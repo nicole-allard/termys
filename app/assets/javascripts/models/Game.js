@@ -279,8 +279,12 @@ define([
             this.unset(attrName, { silent: true });
 
             var collection = this[propertyName];
-            if (!_.isEqual(collection && collection.models, newCollection && newCollection.models)) {
-                this[propertyName] = newCollection;
+            if (!collection || !_.isEqual(collection.models, newCollection.models)) {
+                if (collection)
+                    collection.reset(newCollection.models);
+                else
+                    this[propertyName] = newCollection;
+                
                 this.trigger('changeProperty:' + propertyName);
             }
         },
