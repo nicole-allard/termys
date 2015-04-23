@@ -19,6 +19,9 @@ define([
             BonusesView.prototype.initialize.call(this, options);
             this.allowSelection = true;
             this.listenTo(this, 'itemview:select:bonus', this.handleSelection);
+            this.app.game.players.each(function (player) {
+                this.listenTo(player, 'changeProperty:bonus', this.render);
+            }, this);
         },
 
         handleSelection: function (bonusView) {
@@ -27,20 +30,6 @@ define([
 
             var bonus = bonusView.model;
             bonus.take(this.app.player);
-
-            // TODO NO! Don't do this here, should use player blocking list to
-            // change the game state.
-            // This should jsut remove the player from the blocking list.
-            if (this.app.game.players.every(function (player) {
-                return !!player.bonus;
-            })) {
-                this.app.game.set({
-                    state: 'active'
-                });
-            }
-
-            this.app.game.activateNextPlayer();
-            this.app.game.save();
         }
     });
 

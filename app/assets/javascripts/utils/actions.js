@@ -62,7 +62,7 @@ define([
 
             // remove player from blocking players list once player
             // chooses their bonus
-            this.listenTo(this, 'changeProperty:bonus', function () {
+            this.listenToOnce(this, 'changeProperty:bonus', function () {
                 this.app.game.blockingPlayers.remove(this);
             });
 

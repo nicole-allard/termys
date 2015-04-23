@@ -123,22 +123,32 @@ define([
         },
 
         deserialize: function () {
-            var bonus = this.get('bonus');
-            // Only clear out the bonus if specifically set to null. If undefined,
-            // it could just mean that it wasn't changed.
-            if (bonus === null)
-                this.bonus = null;
-            else if (bonus)
-                this.bonus = Bonus.expand({ app: this.app, key: bonus });
-
-            this.unset('bonus');
-            this.trigger('changeProperty:bonus');
+            this.updateBonus();
 
             _.each(['power', 'supply', 'income'], function (attrName) {
                 var val = this.get(attrName);
                 if (val && typeof val === 'string')
                     this.set(attrName, JSON.parse(val), { silent: true });
             }, this);
+        },
+
+        updateBonus: function () {
+            var bonus = this.get('bonus'),
+                newBonus;
+
+            // Only clear out the bonus if specifically set to null. If undefined,
+            // it could just mean that it wasn't changed.
+            if (bonus === null)
+                newBonus = null;
+            else if (bonus)
+                newBonus = Bonus.expand({ app: this.app, key: bonus });
+
+            this.unset('bonus');
+
+            if (newBonus !== undefined && this.bonus !== newBonus) {
+                this.bonus = newBonus;
+                this.trigger('changeProperty:bonus');
+            }
         },
 
         updateCookie: function () {

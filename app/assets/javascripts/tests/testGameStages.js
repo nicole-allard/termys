@@ -862,9 +862,14 @@ define([
 
                 stubGetGame($.Deferred()
                     .resolve({
-                        game: fixtures.bonusesGame,
+                        // Mark only ken as blocking, since Nic has already taken a bonus
+                        game: _.extend(fixtures.bonusesGame, {
+                            blocking_players: [11]
+                        }),
                         players: [
+                            // Return nic as having a bonus
                             fixtures.bonusedNic,
+                            // Return ken as not having a bonus
                             fixtures.factionedKen
                         ]
                     })

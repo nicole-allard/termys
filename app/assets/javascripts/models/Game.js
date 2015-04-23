@@ -97,6 +97,30 @@ define([
         },
 
         handleInitialBonuses: function () {
+            var playerChoseBonus = function (player) {
+                if (this.app.player !== player)
+                    return;
+
+                if (!this.blockingPlayers.length) {
+                    this.set({
+                        state:'active'
+                    });
+                 
+                    this.stopListening(this.blockingPlayers, 'remove', playerChoseBonus);
+                }
+
+                this.activateNextPlayer();
+
+                // Wait until the call stack has completed before saving. Once save is called,
+                // another player will be the active player and have control. Before that happens,
+                // we want to ensure that all the callbacks and handlers have executed based on
+                // the event that caused this callback to execute. This way we don't need to
+                // ensure that all unrelated callbacks are called before this one.
+                _.defer(_.bind(this.save, this));
+            };
+
+            this.listenTo(this.blockingPlayers, 'remove', playerChoseBonus);
+
             // This will indicate to the view that the player should
             // choose a bonus. That will cause the bonuses modal to
             // open and show all the bonuses. The view will handle
@@ -233,14 +257,9 @@ define([
                 propertyName = attrName;
             }
 
-            var collection = this[propertyName];
-            if (!collection)
-                collection = this[propertyName] = new Backbone.Collection([], collectionOptions);
-            else
-                collection.reset([], collectionOptions);
-
             var app = this.app,
-                value = this.get(attrName);
+                value = this.get(attrName),
+                newCollection = new Backbone.Collection([], collectionOptions);
 
             if (typeof value === "string")
                 value = JSON.parse(value);
@@ -252,13 +271,18 @@ define([
                 // remove duplicates.
                 // If the model doesn't already exist, it will be created and added to the
                 // collection.
-                collection.add(Model.expand ?
+                newCollection.add(Model.expand ?
                     Model.expand({ app: app, value: value, key: key }) :
                     new UniqueModel(Model, _.isObject(value) ? value : { id: value }, { app: app }));
             });
 
             this.unset(attrName, { silent: true });
-            this.trigger('changeProperty:' + propertyName);
+
+            var collection = this[propertyName];
+            if (!_.isEqual(collection && collection.models, newCollection && newCollection.models)) {
+                this[propertyName] = newCollection;
+                this.trigger('changeProperty:' + propertyName);
+            }
         },
 
         /**
@@ -281,11 +305,15 @@ define([
          * updating hex data
          */
         updateBoard: function () {
-            this.board.set({
-                hexes: JSON.parse(this.get('board'))
-            });
+            var newHexes = JSON.parse(this.get('board'));
+            if (newHexes !== this.board.get('hexes')) {
+                this.board.set({
+                    hexes: newHexes
+                });
+                this.trigger('changeProperty:board');
+            }
+
             this.unset('board', { silent: true });
-            this.trigger('changeProperty:board');
         },
 
         toJSON: function () {
